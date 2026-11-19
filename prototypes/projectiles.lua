@@ -1,0 +1,185 @@
+local utils = require("libs/utils")
+
+local direct_action_additional_delivery = {
+	{
+		type = "instant",
+		target_effects =
+		{
+			{
+				type = "create-entity",
+				entity_name = "visual-tracer-explosion-hit-normal", -- may be overriden by archetype
+				tile_collision_mask = {layers={water_tile=true}},
+			},
+			{
+				type = "create-entity",
+				entity_name = "water-splash",
+				tile_collision_mask = {layers={ground_tile=true}},
+			}
+		},
+	}
+}
+
+---@type table<string, projectile_archetype> | table
+local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_settings"].data
+local default_projectile_prototype = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_template"].data
+
+
+---@param ammo_prototype_name string
+---@return projectile_archetype
+local function match_archetype(ammo_prototype_name)
+	for _, archetype in pairs(archetypes_map) do
+		for _, str in ipairs(archetype.matching_strings) do
+			if string.find(ammo_prototype_name, str) then
+				return archetype
+			end
+		end
+	end
+	return archetypes_map["unknown"]
+end
+
+local function populate_tracer_prototypes()
+	-- first - collect all existing ammo_types
+
+	-- ammo_type.name -> ammo_type.source_type -> ammo_prototype
+	local ammo_type_map = {}
+
+	for name, ammo_prototype in pairs(data.raw["ammo"]) do
+		-- discard non bullet ammos
+		if not ammo_prototype or ammo_prototype.ammo_category ~= "bullet" then
+			goto next_ammo_prototype
+		end
+
+		if not ammo_prototype.ammo_type[1] then
+			-- simple case - only "default" source_type
+			ammo_type_map[name] = {}
+			ammo_type_map[name]["default"] = ammo_prototype.ammo_type
+		else
+			for _, ammo_type in ipairs(ammo_prototype.ammo_type) do
+				if not ammo_type then
+					goto continue -- should never happen
+				end
+
+				if not ammo_type_map[name] then
+					ammo_type_map[name] = {}
+				end
+
+				if ammo_type_map[name][ammo_type.source_type] then
+					error(string.format("Multiple ammo_types with the same source_type=\"%s\" registered for ammo \"%s\". Not expected by this mod.", ammo_type.source_type, name))
+				end
+
+				ammo_type_map[name][ammo_type.source_type] = ammo_type
+				-- Yes we have ignored target_filter entirely
+				::continue::
+			end
+		end
+
+		::next_ammo_prototype::
+	end
+
+	if table_size(ammo_type_map) == 0 then
+		error(string.format("All available ammo prototypes[%d] are inapplicable for this mod. It most like caused by other mod, not yet known to be incompetible.", table_size(data.raw["ammo"])))
+	end
+
+	---@type table<string, table<string, string>> ammo_prototype_name -> source_type -> tracer_name
+	local registered_tracers = {}
+	-- generate tracers
+	for ammo_prototype_name, values in pairs(ammo_type_map) do
+		local archetype = match_archetype(ammo_prototype_name)
+
+		for source_type, ammo_type in pairs(values) do
+			---@type ProjectilePrototype
+			local tracer_prototype = table.deepcopy(default_projectile_prototype)
+			tracer_prototype.name = utils.generate_tracer_name(ammo_prototype_name, source_type)
+			tracer_prototype.light = archetype.light
+			tracer_prototype.animation.filename = archetype.animation_filename
+
+			tracer_prototype.action = {}
+
+			local actions = table.deepcopy(ammo_type.action)
+			if not actions[1] then
+				actions = {actions}
+			end
+
+			for _, action in ipairs(actions) do
+				if action.type ~= "direct" then
+					-- ignore indirect actions - will be applied by ammo itself
+					goto next_action
+				end
+
+				-- Check direct action or delivery-based actions
+				local action_deliveries = action.action_delivery
+				if not action_deliveries then
+					goto next_action
+				end
+
+				local target_effects = action_deliveries.target_effects
+				if not target_effects then
+					goto next_action
+				end
+
+				-- remove all source effects
+				action_deliveries.source_effects = nil
+
+				-- stealing action
+				tracer_prototype.action[#tracer_prototype.action + 1] = action
+
+				::next_action::
+			end
+
+			-- modify cosmetic explosion
+			local action_additional_delivery = direct_action_additional_delivery
+			if archetype.explosion_filename then
+				action_additional_delivery = table.deepcopy(direct_action_additional_delivery)
+				action_additional_delivery[1].target_effects[1].entity_name = archetype.explosion_filename
+			end
+
+			if not tracer_prototype.action or #tracer_prototype.action == 0 then
+				-- Strange case. Ammo was stripped from all actions or all non target deliveries. Should never happen, but assume some mods may affect this
+				-- Assume it is a mod mishup, so adding cosmetic target delivery and a guessed damage to target
+				tracer_prototype.action = {
+					type = "direct",
+					action_delivery = direct_action_additional_delivery
+				}
+				if archetype.reference_damage and archetype.reference_damage > 0 then
+					-- append some predefined damage, so ammo will hurt
+					tracer_prototype.action.action_delivery[#direct_action_additional_delivery + 1] = {
+						type = "instant",
+						target_effects = {
+							type = "damage",
+							damage = {amount = archetype.reference_damage, type = "physical"}
+						}
+					}
+				end
+			else
+				-- just add cosmetic action
+				tracer_prototype.action[#tracer_prototype.action + 1] = {
+					type = "direct",
+					action_delivery = direct_action_additional_delivery
+				}
+			end
+
+			-- register prototype
+			if not registered_tracers[ammo_prototype_name] then
+				registered_tracers[ammo_prototype_name] = {}
+			end
+			registered_tracers[ammo_prototype_name][source_type] = tracer_prototype.name
+			data:extend({
+				tracer_prototype
+			})
+		end
+	end
+
+	if table_size(registered_tracers) > 0 then
+		-- expose final tracer names for lookup later or from other mods
+		data:extend({
+			{
+				type = "mod-data",
+				name = "beshineis_tracers--mod_data-tracers",
+				data_type = "beshineis_tracers.tracers",
+				data = registered_tracers
+			}
+		})
+	end
+end
+
+populate_tracer_prototypes()

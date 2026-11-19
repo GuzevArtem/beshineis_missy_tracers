@@ -1,0 +1,18 @@
+{
+	"name": "beshineis_missy_tracers",
+	"version": "1.0.0",
+	"title": "Beshinei's Respectful Missfired Bullet Tracers",
+	"author": "Beshinei & Kittah Khan & Ownlyme & Piupas",
+	"contact":"",
+	"homepage":"",
+	"description": "A mix of bullet tracers and distant misfires, this is how i imagined bullet trails, that respects actual turret/weapon ranges.\nFork of Bullet Tracers (Ownly's) - 2.1 Fork",
+	"dependencies": [
+		"base >= 2.1",
+		"(?) tungsten-munition",
+		"(?) OCs_ammo_casting",
+		"(?) Nexus",
+		"(?) Cerys-Moon-of-Fulgora",
+		"(?) PlutoniumEnergy"
+	],
+	"factorio_version": "2.1"
+}
