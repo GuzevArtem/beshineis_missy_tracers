@@ -9,11 +9,13 @@ local direct_action_additional_delivery = {
 				type = "create-entity",
 				entity_name = "visual-tracer-explosion-hit-normal", -- may be overriden by archetype
 				tile_collision_mask = {layers={water_tile=true}},
+				-- offsets = { { 5, 5 } }, -- offset explosion center closer to actual hit position. ABSOLUTE! NOT RELATIVE TO PROJECTILE
 			},
 			{
 				type = "create-entity",
 				entity_name = "water-splash",
 				tile_collision_mask = {layers={ground_tile=true}},
+				-- offsets = { { 5, 5 } }, -- offset splash center closer to actual hit position. ABSOLUTE! NOT RELATIVE TO PROJECTILE
 			}
 		},
 	}
@@ -23,6 +25,83 @@ local direct_action_additional_delivery = {
 local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_settings"].data
 local default_projectile_prototype = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_template"].data
 
+---@param tracer_prototype ProjectilePrototype
+---@param archetype projectile_archetype
+local function apply_cosmetic_effects(tracer_prototype, archetype)
+	-- TODO: remove offsets from original cosmetic effects
+	-- TODO: replace/append custom effects if needed
+
+	for _, action in ipairs(tracer_prototype.action) do
+		if action.type ~= "direct" then
+			-- ignore indirect actions - will be applied by ammo itself
+			goto next_action
+		end
+
+		-- Check direct action or delivery-based actions
+		local action_deliveries = action.action_delivery
+		if not action_deliveries then
+			goto next_action
+		end
+
+		local target_effects = action_deliveries.target_effects
+		if not target_effects then
+			goto next_action
+		end
+
+		if not target_effects[1] then
+			target_effects = { target_effects }
+		end
+
+		-- remove "explosion-hit" cosmetic (mostly from vanilla or vanilla derived projectiles)
+		-- It has a nasty offsets and graphic is mediocore with tracers
+		for index = #target_effects, 1, -1 do
+			local effect = target_effects[index]
+			if effect.type ~= "create-entity" then
+				goto next_effect
+			end
+
+			if effect.entity_name == "explosion-hit" then
+				table.remove(target_effects, index)
+			end
+
+			::next_effect::
+		end
+
+		::next_action::
+	end
+
+
+	local action_additional_delivery = direct_action_additional_delivery
+	if archetype.explosion_filename then
+		action_additional_delivery = table.deepcopy(direct_action_additional_delivery)
+		action_additional_delivery[1].target_effects[1].entity_name = archetype.explosion_filename
+	end
+
+	if not tracer_prototype.action or #tracer_prototype.action == 0 then
+		-- Strange case. Ammo was stripped from all actions or all non target deliveries. Should never happen, but assume some mods may affect this
+		-- Assume it is a mod mishup, so adding cosmetic target delivery and a guessed damage to target
+		tracer_prototype.action = {
+			type = "direct",
+			action_delivery = action_additional_delivery
+		}
+		if archetype.reference_damage and archetype.reference_damage > 0 then
+			-- append some predefined damage, so ammo will hurt
+			tracer_prototype.action.action_delivery[#action_additional_delivery + 1] = {
+				type = "instant",
+				target_effects = {
+					type = "damage",
+					damage = {amount = archetype.reference_damage, type = "physical"}
+				}
+			}
+		end
+	else
+		-- just add cosmetic action
+		tracer_prototype.action[#tracer_prototype.action + 1] = {
+			type = "direct",
+			action_delivery = action_additional_delivery
+		}
+	end
+end
 
 ---@param ammo_prototype_name string
 ---@return projectile_archetype
@@ -127,36 +206,7 @@ local function populate_tracer_prototypes()
 			end
 
 			-- modify cosmetic explosion
-			local action_additional_delivery = direct_action_additional_delivery
-			if archetype.explosion_filename then
-				action_additional_delivery = table.deepcopy(direct_action_additional_delivery)
-				action_additional_delivery[1].target_effects[1].entity_name = archetype.explosion_filename
-			end
-
-			if not tracer_prototype.action or #tracer_prototype.action == 0 then
-				-- Strange case. Ammo was stripped from all actions or all non target deliveries. Should never happen, but assume some mods may affect this
-				-- Assume it is a mod mishup, so adding cosmetic target delivery and a guessed damage to target
-				tracer_prototype.action = {
-					type = "direct",
-					action_delivery = direct_action_additional_delivery
-				}
-				if archetype.reference_damage and archetype.reference_damage > 0 then
-					-- append some predefined damage, so ammo will hurt
-					tracer_prototype.action.action_delivery[#direct_action_additional_delivery + 1] = {
-						type = "instant",
-						target_effects = {
-							type = "damage",
-							damage = {amount = archetype.reference_damage, type = "physical"}
-						}
-					}
-				end
-			else
-				-- just add cosmetic action
-				tracer_prototype.action[#tracer_prototype.action + 1] = {
-					type = "direct",
-					action_delivery = direct_action_additional_delivery
-				}
-			end
+			apply_cosmetic_effects(tracer_prototype, archetype)
 
 			-- register prototype
 			if not registered_tracers[ammo_prototype_name] then
