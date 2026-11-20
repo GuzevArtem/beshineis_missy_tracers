@@ -351,7 +351,7 @@ if mode_of_operation ~= "unified" then
 			else
 				for name, prototype in pairs(data.raw[entity_type]) do
 					-- filter non projectile weapons
-					if not prototype or not prototype.valid or not prototype.attack_parameters or prototype.attack_parameters.type ~= "projectile" then
+					if not prototype or not prototype.attack_parameters or prototype.attack_parameters.type ~= "projectile" then
 						goto next_prototype
 					end
 
