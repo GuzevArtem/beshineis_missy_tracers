@@ -1,1 +1,55 @@
-/.vscode
+# Compiled mod packages & build artifacts
+*.zip
+/build/
+/dist/
+/out/
+/release/
+
+# Local Factorio data (if developing directly inside the Factorio/mods directory)
+/mod-list.json
+/mod-settings.dat
+/player-data.json
+/script-output/
+/temp/
+/saves/
+/factorio-current.log
+/factorio-previous.log
+
+# Raw art, audio, and 3D source files (keep final .png/.ogg assets tracked)
+*.psd
+*.pdn
+*.xcf
+*.kra
+*.blend
+*.blend1
+*.ai
+*.svg
+*.wav
+*.aup
+*.aup3
+
+# IDE & Editor settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# Lua tooling & language server caches
+.luarc.json
+.luacheckrc
+*.luac
+
+# Operating System files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
