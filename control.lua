@@ -8,7 +8,7 @@ if mode_of_operation ~= "projectile_spawner" then
 	return
 end
 
-local debug = (settings.startup["beshineis_tracers--debug"] or { value = false }).value
+local debug = false
 
 local player_targeting = settings.startup["beshineis_tracers--player_targeting"].value
 --[[ One day this setting will be runtime

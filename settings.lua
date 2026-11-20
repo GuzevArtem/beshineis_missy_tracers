@@ -173,14 +173,4 @@ data:extend({
 		per_user = false
 	},
 
-	-- runtime
-	{
-		type = "bool-setting",
-		name = "beshineis_tracers--debug",
-		setting_type = "startup",
-		default_value = true, -- TODO: remove?
-		order = "z99",
-		per_user = true
-	},
-
 })
