@@ -11,9 +11,13 @@ Mod is in an early development stage, and 'API' is expected to change.
 # TODO
 * Replace thumbnail with a unique one
 * Find a way to make player_targeting "runtime-per-player" setting, keeping turrets(vehicles?) as startup.
-* Add third mode of operation - codename "hidden-turret". It will create more prototypes, but should be practically without events at runtime. (Only callbacks for events that require entity swapping)
 * Redraw/extend library of tracers. (Currently missing blue-plutonium and purple-tungsten variations from common mods)
+* Handle character/characters guns explicitly - give them suitable defaults, so player won't shoot from its stomach.
+
+# Wishlist
+* Support skins, in the way that projectile spawn position could/will be adjusted for skins with gun location that differs from vanilla
 * Create satelite mod(s), that exposes individual configurations. Only these satellite mods will handle modded entities explicitly, but those mods require a settings generator of some kind. (As in Better Planets). Mods needed for: tracer settings per ammo; projectile/shell/deviation settings per gun(including vehicle gun's)/turret/armor(or 'naked' engineer)
+* Add third mode of operation - codename "hidden-turret". It will create more prototypes, but should be practically without events at runtime. (Only callbacks for events that require entity swapping)
 
 # Known issues
 * Misaligned projectiles - figuring out how to properly set up projectile creation properties.
