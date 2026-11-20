@@ -1,8 +1,8 @@
 local utils = require("libs/utils")
 local math2d = require("math2d")
 
--- "unified", "projectile_spawner", "hidden_turret"
-local mode_of_operation = settings.startup["beshineis_tracers--mode_of_operation"].value
+---@type "unified"|"projectile_spawner"|"hidden_turret"
+local mode_of_operation = tostring(settings.startup["beshineis_tracers--mode_of_operation"].value) or "projectile_spawner"
 if mode_of_operation ~= "projectile_spawner" then
 	--early return, since no need for this logic
 	return
@@ -10,7 +10,8 @@ end
 
 local debug = false
 
-local player_targeting = settings.startup["beshineis_tracers--player_targeting"].value
+--- @type "directional"|"entity_leading"|"entity"|"vanilla"
+local player_targeting = tostring(settings.startup["beshineis_tracers--player_targeting"].value) or "directional"
 --[[ One day this setting will be runtime
 local per_player_targeting_setting_map = {
 }

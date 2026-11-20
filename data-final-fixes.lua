@@ -183,9 +183,10 @@ end
 prepare_brackets()
 ]]--
 
-local player_targeting = settings.startup["beshineis_tracers--player_targeting"].value
--- "unified", "projectile_spawner", "hidden_turret"
-local mode_of_operation = settings.startup["beshineis_tracers--mode_of_operation"].value
+--- @type "directional"|"entity_leading"|"entity"|"vanilla"
+local player_targeting = tostring(settings.startup["beshineis_tracers--player_targeting"].value) or "directional"
+---@type "unified"|"projectile_spawner"|"hidden_turret"
+local mode_of_operation = tostring(settings.startup["beshineis_tracers--mode_of_operation"].value) or "projectile_spawner"
 
 local entity_configurations = data.raw["mod-data"]["beshineis_tracers--mod_data-entity_configuration_overrides"].data
 
