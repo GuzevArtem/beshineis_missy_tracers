@@ -107,6 +107,7 @@ local ammo_inventory_map = {
 --#endregion
 
 --#region helper functions
+
 ---@param entity LuaEntity
 ---@param selected_inventory_index integer?
 ---@return double -- range_modifier

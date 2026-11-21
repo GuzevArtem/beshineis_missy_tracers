@@ -1,5 +1,13 @@
 local utils = require("libs/utils")
 
+--#region startup settings
+
+---@type table<string, projectile_archetype> | table
+local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_settings"].data
+local default_projectile_prototype = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_template"].data
+--#endregion
+
+--#region lookups
 local direct_action_additional_delivery = {
 	{
 		type = "instant",
@@ -20,11 +28,11 @@ local direct_action_additional_delivery = {
 		},
 	}
 }
+--#endregion
 
----@type table<string, projectile_archetype> | table
-local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_settings"].data
-local default_projectile_prototype = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_template"].data
+--#region helper functions
 
+-- also aplies damage from archetype, if none is present on projectile itself
 ---@param tracer_prototype ProjectilePrototype
 ---@param archetype projectile_archetype
 local function apply_cosmetic_effects(tracer_prototype, archetype)
@@ -253,7 +261,7 @@ local function populate_tracer_prototypes()
 	end
 
 	if table_size(ammo_type_map) == 0 then
-		error(string.format("All available ammo prototypes[%d] are inapplicable for this mod. It most like caused by other mod, not yet known to be incompetible.", table_size(data.raw["ammo"])))
+		error(string.format("All available ammo prototypes[%d] are inapplicable for this mod. It most likely caused by other mod, not yet known to be incompetible.", table_size(data.raw["ammo"])))
 	end
 
 	---@type table<string, table<string, string>> ammo_prototype_name -> source_type -> tracer_name
@@ -277,5 +285,8 @@ local function populate_tracer_prototypes()
 		})
 	end
 end
+--#endregion
 
-populate_tracer_prototypes()
+do
+	populate_tracer_prototypes()
+end

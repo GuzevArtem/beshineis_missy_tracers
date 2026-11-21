@@ -128,6 +128,15 @@ data:extend({
 		order = "s06",
 	},
 	{
+		type = "double-setting",
+		name = "beshineis_tracers--tracer_length_scale",
+		setting_type = "startup",
+		default_value = 0.5,
+		minimum_value = 0.1,
+		maximum_value = 1.0,
+		order = "s07",
+	},
+	{
 		type = "string-setting",
 		name = "beshineis_tracers--player_targeting",
 		setting_type = "startup",

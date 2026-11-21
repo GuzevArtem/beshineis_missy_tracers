@@ -159,5 +159,13 @@ function beshineis_tracers_utils_obj.get_targetable_forces_for(force)
 	return result
 end
 
+do
+	local tracer_length_scale = tonumber(settings.startup["beshineis_tracers--tracer_length_scale"].value) or 0.5
+
+	beshineis_tracers_utils_obj.projectile_animation_height_px = tracer_length_scale * 496
+	local projectile_animation_height_tiles = beshineis_tracers_utils_obj.projectile_animation_height_px / 32 -- in tiles
+	beshineis_tracers_utils_obj.projectile_animation_shift_y = projectile_animation_height_tiles / 2 or 0
+end
+
 beshineis_tracers_utils = beshineis_tracers_utils_obj
 return beshineis_tracers_utils_obj

@@ -183,12 +183,16 @@ end
 prepare_brackets()
 ]]--
 
+--#region startup settings
 --- @type "directional"|"entity_leading"|"entity"|"vanilla"
 local player_targeting = tostring(settings.startup["beshineis_tracers--player_targeting"].value) or "directional"
 ---@type "unified"|"projectile_spawner"|"hidden_turret"
 local mode_of_operation = tostring(settings.startup["beshineis_tracers--mode_of_operation"].value) or "projectile_spawner"
 
 local entity_configurations = data.raw["mod-data"]["beshineis_tracers--mod_data-entity_configuration_overrides"].data
+--#endregion
+
+--#region lookups
 
 -- list of everything that could fire bullets
 local ammo_source_type_map = {
@@ -205,8 +209,9 @@ local ammo_source_type_map = {
 	["character"] = "player",
 	["gun"] = "player" -- added here, since working with prototypes, not runtime entities
 }
+--#endregion
 
--- bump resistances for foliage (trees/rocks) and stomper shells
+--#region bump resistances for foliage (trees/rocks) and stomper shells
 do
 	local function add_resistance(entity, flat, percent)
 		entity.resistances = entity.resistances or {}
@@ -252,8 +257,9 @@ do
 		end
 	end
 end
+--#endregion
 
--- adjust barrel offstes based on configuration
+--#region adjust barrel offstes based on configuration
 do
 	---comment
 	---@param name string
@@ -363,8 +369,9 @@ do
 		::next_entity_configuration::
 	end
 end
+--#endregion
 
--- adjust deviation overrides for special entities
+--#region adjust deviation overrides for special entities
 if mode_of_operation ~= "unified" then
 	local entity_deviation_coef_map = data.raw["mod-data"]["beshineis_tracers--mod_data-entity_deviation_override_map"].data
 	local default_entity_configuration = entity_configurations["default"] or error("Missing beshineis_tracers--mod_data-entity_deviation_override_map[\"default\"]. Some rude mod may have removed it.")
@@ -418,6 +425,9 @@ if mode_of_operation ~= "unified" then
 		end
 	end
 end
+--#endregion
+
+--#region modify ammo
 
 ---@param ammo_type AmmoType
 ---@param ammo_name string
@@ -650,12 +660,12 @@ local function modify_shotguns_pellets ()
 		filename = "__beshineis_missy_tracers__/graphics/railgun-beam-y.png",
 		priority = "extra-high",
 		width = 16,
-		height = 496,
+		height = utils.projectile_animation_height_px,
 		frame_count = 17,
 		animation_speed = 1,
 		draw_as_glow = true,
 		blend_mode = "additive",
-		shift = {0, 6.75*shotgun_scale},
+		shift = {0, utils.projectile_animation_shift_y*shotgun_scale},
 		rotate_shift =true,
 		scale = shotgun_scale,
 		tint = shotgun_tint,
@@ -688,8 +698,10 @@ local function modify_shotguns_pellets ()
 end
 
 modify_shotguns_pellets()
+--#endregion
 
-do -- apply leading_configuration
+--#region apply leading_configuration
+do
 	local leading_configuration = {
 		projectile_speed = tonumber(settings.startup["beshineis_tracers--speed"].value),
 		ticks_ahead = tonumber(settings.startup["beshineis_tracers--prediction_overshoot_ticks"].value)
@@ -718,3 +730,4 @@ do -- apply leading_configuration
 		end
 	end
 end
+--#endregion

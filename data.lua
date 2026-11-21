@@ -24,12 +24,12 @@ do -- projectile configurations
 			filename = "__beshineis_missy_tracers__/graphics/railgun-beam-yv.png",
 			priority = "extra-high",
 			width = 16,
-			height = 496,
+			height = utils.projectile_animation_height_px,
 			frame_count = 17,
 			animation_speed = 1,
 			draw_as_glow = true,
 			blend_mode = "additive",
-			shift = {0, 6.75}, -- offset to compensate for trail not yet present on the first frame. In tiles.
+			shift = {0, utils.projectile_animation_shift_y}, -- offset to compensate for trail not yet present on the first frame. In tiles.
 			rotate_shift = true, -- since we compensating for animation offset, we should align it with fire direction
 			scale = 1,
 		},
