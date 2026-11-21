@@ -5,7 +5,7 @@
 	"author": "Beshinei & Kittah Khan & Ownlyme & Piupas",
 	"contact":"",
 	"homepage":"",
-	"description": "A mix of bullet tracers and distant misfires, this is how i imagined bullet trails, that respects actual turret/weapon ranges.\nFork of Bullet Tracers (Ownly's) - 2.1 Fork",
+	"description": "A mix of bullet tracers and distant misfires, this is how i imagined bullet trails, that respects actual turret/weapon ranges and qualities.\nBased on Bullet Tracers (Ownly's) - 2.1 Fork",
 	"dependencies": [
 		"base >= 2.1",
 		"? quality",
