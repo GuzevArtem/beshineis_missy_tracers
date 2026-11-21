@@ -6,7 +6,7 @@ local beshineis_tracers_utils_obj = {}
 
 do
 ---@class projectile_archetype
----@field matching_strings string[]
+---@field matching_strings table<string>
 ---@field reference_damage double
 ---@field piercing_damage double?
 ---@field explosion_filename string?
@@ -58,37 +58,17 @@ end
 
 ---@param ammo_prototype_name string
 ---@param source_type AmmoSourceType
----@param quality_name QualityName?
 ---@return string
-function beshineis_tracers_utils_obj.generate_tracer_name(ammo_prototype_name, source_type, quality_name)
-	local tracer_name = string.format("visual-tracer-projectile_%s_%s", ammo_prototype_name, source_type)
-	if beshineis_tracers_utils_obj.using_quality and quality_name then
-		tracer_name = string.format("%s_%s", tracer_name, quality_name)
-	end
-	return tracer_name
+function beshineis_tracers_utils_obj.generate_tracer_name(ammo_prototype_name, source_type)
+	return string.format("visual-tracer-projectile_%s_%s", ammo_prototype_name, source_type)
 end
 
----@param tracers table<string, table<string, string|table<QualityName, string>>>
----@param ammo_prototype_name string|nil
+---@param tracers table<string, table<string, string>>
+---@param ammo_prototype_name string?
 ---@param source_type AmmoSourceType
----@param quality_name QualityName?
----@return string
-function beshineis_tracers_utils_obj.match_best_tracer(tracers, ammo_prototype_name, source_type, quality_name)
-	local tracer_name = tracers and ammo_prototype_name and tracers[ammo_prototype_name] and (tracers[ammo_prototype_name][source_type] or tracers[ammo_prototype_name]["default"])
-
-	if not tracer_name then
-		error(string.format("No tracer was defined for ammo=\"%s\" with source_type=\"%s\".", ammo_prototype_name, source_type))
-	end
-
-	if type(tracer_name) == "string" then
-		return tracer_name
-	end
-
-	if beshineis_tracers_utils_obj.using_quality then
-		return tracer_name[quality_name or beshineis_tracers_utils_obj.stub_quality] or tracer_name[beshineis_tracers_utils_obj.stub_quality]
-	end
-
-	error("Should never happen.")
+---@return string?
+function beshineis_tracers_utils_obj.match_best_tracer(tracers, ammo_prototype_name, source_type)
+	return tracers and ammo_prototype_name and tracers[ammo_prototype_name] and (tracers[ammo_prototype_name][source_type] or tracers[ammo_prototype_name]["default"])
 end
 
 
