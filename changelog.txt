@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2026-11-21
+  Changes:
+    - Guns range scales with quality
+    - Ammo damage scales with quality (but ammo range modifier - don't!)
+    - Fix crash when firing from vehicles (turret rotation still broken)
+
+---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2026-11-21
   Changes:

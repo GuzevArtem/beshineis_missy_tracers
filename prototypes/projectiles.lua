@@ -27,7 +27,8 @@ local default_projectile_prototype = data.raw["mod-data"]["beshineis_tracers--mo
 
 ---@param tracer_prototype ProjectilePrototype
 ---@param archetype projectile_archetype
-local function apply_cosmetic_effects(tracer_prototype, archetype)
+---@param quality QualityPrototype?
+local function apply_cosmetic_effects(tracer_prototype, archetype, quality)
 	-- TODO: remove offsets from original cosmetic effects
 	-- TODO: replace/append custom effects if needed
 
@@ -84,13 +85,15 @@ local function apply_cosmetic_effects(tracer_prototype, archetype)
 			type = "direct",
 			action_delivery = action_additional_delivery
 		}
+
 		if archetype.reference_damage and archetype.reference_damage > 0 then
+			local damage = archetype.reference_damage * ((utils.using_quality and quality and quality.default_multiplier) or 1)
 			-- append some predefined damage, so ammo will hurt
 			tracer_prototype.action.action_delivery[#action_additional_delivery + 1] = {
 				type = "instant",
 				target_effects = {
 					type = "damage",
-					damage = {amount = archetype.reference_damage, type = "physical"}
+					damage = {amount = damage, type = "physical"}
 				}
 			}
 		end
@@ -114,6 +117,111 @@ local function match_archetype(ammo_prototype_name)
 		end
 	end
 	return archetypes_map["unknown"]
+end
+
+---@param ammo_prototype_name string
+---@param ammo_types table<AmmoSourceType, AmmoType>
+---@param archetype projectile_archetype
+---@param registered_tracers table
+---@param quality QualityPrototype? -- TODO: remove? quality.default_multiplier not present during prototype stage anyway
+local function populate_tracers_per_ammo_type(ammo_prototype_name, ammo_types, archetype, registered_tracers, quality)
+	local quality_damage_scale = (utils.using_quality and quality and quality.default_multiplier) or 1
+	for source_type, ammo_type in pairs(ammo_types) do
+		---@type ProjectilePrototype
+		local tracer_prototype = table.deepcopy(default_projectile_prototype)
+		tracer_prototype.name = utils.generate_tracer_name(ammo_prototype_name, source_type, (quality and quality.name) or nil)
+		tracer_prototype.light = archetype.light
+		tracer_prototype.animation.filename = archetype.animation_filename
+
+		tracer_prototype.action = {}
+
+		local total_damage = 0
+
+		local actions = table.deepcopy(ammo_type.action)
+		if not actions then
+			actions = {}
+		elseif not actions[1] then
+			actions = {actions}
+		end
+
+		for _, action in ipairs(actions) do
+			if action.type ~= "direct" then
+				-- ignore indirect actions - will be applied by ammo itself
+				goto next_action
+			end
+
+			-- Check direct action or delivery-based actions
+			local action_deliveries = action.action_delivery
+			if not action_deliveries then
+				goto next_action
+			end
+
+			local target_effects = action_deliveries.target_effects
+			if not target_effects then
+				goto next_action
+			end
+			if not target_effects[1] then
+				target_effects = {target_effects}
+			end
+
+			-- gather total cumulitive damage from all possible effects
+			for _, effect in pairs(target_effects) do
+				if effect.type ~= "damage" or not effect.damage or not effect.damage.amount then
+					goto next_effect
+				end
+				effect.damage.amount = effect.damage.amount * quality_damage_scale
+				if effect.damage.type ~= "physical" then
+					goto next_effect
+				end
+				total_damage = total_damage + effect.damage.amount
+				::next_effect::
+			end
+
+			action_deliveries.target_effects = ((#target_effects == 1) and target_effects[1]) or target_effects
+
+			-- remove all source effects
+			action_deliveries.source_effects = nil
+
+			-- stealing action
+			tracer_prototype.action[#tracer_prototype.action + 1] = action
+
+			::next_action::
+		end
+
+		-- deduce piercing value
+		if archetype.piercing_damage and archetype.piercing_damage > 0 then
+			tracer_prototype.piercing_damage = archetype.piercing_damage * quality_damage_scale
+		elseif string.find(ammo_prototype_name, "piercing", 1, true) then
+			-- just guessing at this point
+			-- collect all total damage and scale by some amount
+
+			total_damage = total_damage * 25 -- scale it up, red mag~200
+			if total_damage == 0 then
+				total_damage = 100 -- some random, but not ridiculus number
+			end
+
+			tracer_prototype.piercing_damage = total_damage
+		end
+
+		-- modify cosmetic explosion
+		apply_cosmetic_effects(tracer_prototype, archetype, quality)
+
+		-- register prototype
+		if not registered_tracers[ammo_prototype_name] then
+			registered_tracers[ammo_prototype_name] = {}
+		end
+		if quality then
+			if not registered_tracers[ammo_prototype_name][source_type] then
+				registered_tracers[ammo_prototype_name][source_type] = {}
+			end
+			registered_tracers[ammo_prototype_name][source_type][quality.name] = tracer_prototype.name
+		else
+			registered_tracers[ammo_prototype_name][source_type] = tracer_prototype.name
+		end
+		data:extend({
+			tracer_prototype
+		})
+	end
 end
 
 local function populate_tracer_prototypes()
@@ -162,90 +270,18 @@ local function populate_tracer_prototypes()
 	---@type table<string, table<string, string>> ammo_prototype_name -> source_type -> tracer_name
 	local registered_tracers = {}
 	-- generate tracers
-	for ammo_prototype_name, values in pairs(ammo_type_map) do
+	for ammo_prototype_name, ammo_types in pairs(ammo_type_map) do
 		local archetype = match_archetype(ammo_prototype_name)
 
-		for source_type, ammo_type in pairs(values) do
-			---@type ProjectilePrototype
-			local tracer_prototype = table.deepcopy(default_projectile_prototype)
-			tracer_prototype.name = utils.generate_tracer_name(ammo_prototype_name, source_type)
-			tracer_prototype.light = archetype.light
-			tracer_prototype.animation.filename = archetype.animation_filename
-
-			tracer_prototype.action = {}
-
-			local total_damage = 0
-
-			local actions = table.deepcopy(ammo_type.action)
-			if not actions[1] then
-				actions = {actions}
+		--[[ works bad, quality has no field default_multiplier during prototype stage -_-. Using base damage modifier instead
+		if utils.using_quality then
+			for _, quality in pairs(data.raw["quality"]) do
+				populate_tracers_per_ammo_type(ammo_prototype_name, ammo_types, archetype, registered_tracers, quality)
 			end
-
-			for _, action in ipairs(actions) do
-				if action.type ~= "direct" then
-					-- ignore indirect actions - will be applied by ammo itself
-					goto next_action
-				end
-
-				-- Check direct action or delivery-based actions
-				local action_deliveries = action.action_delivery
-				if not action_deliveries then
-					goto next_action
-				end
-
-				local target_effects = action_deliveries.target_effects
-				if not target_effects then
-					goto next_action
-				end
-
-				-- gather total cumulitive damage from all possible effects
-				for _, effect in pairs((target_effects[1] and target_effects) or {target_effects}) do
-					if effect.type ~= "damage" or not effect.damage then
-						goto next_effect
-					end
-					if effect.damage.type ~= "physical" or not effect.damage.amount then
-						goto next_effect
-					end
-					total_damage = total_damage + effect.damage.amount
-					::next_effect::
-				end
-
-				-- remove all source effects
-				action_deliveries.source_effects = nil
-
-				-- stealing action
-				tracer_prototype.action[#tracer_prototype.action + 1] = action
-
-				::next_action::
-			end
-
-			-- deduce piercing value
-			if archetype.piercing_damage and archetype.piercing_damage > 0 then
-				tracer_prototype.piercing_damage = archetype.piercing_damage
-			elseif string.find(ammo_prototype_name, "piercing", 1, true) then
-				-- just guessing at this point
-				-- collect all total damage and scale by some amount
-
-				total_damage = total_damage * 25 -- scale it up, red mag~200
-				if total_damage == 0 then
-					total_damage = 100 -- some random, but not ridiculus number
-				end
-
-				tracer_prototype.piercing_damage = total_damage
-			end
-
-			-- modify cosmetic explosion
-			apply_cosmetic_effects(tracer_prototype, archetype)
-
-			-- register prototype
-			if not registered_tracers[ammo_prototype_name] then
-				registered_tracers[ammo_prototype_name] = {}
-			end
-			registered_tracers[ammo_prototype_name][source_type] = tracer_prototype.name
-			data:extend({
-				tracer_prototype
-			})
-		end
+		else
+		]]--
+			populate_tracers_per_ammo_type(ammo_prototype_name, ammo_types, archetype, registered_tracers)
+		--end
 	end
 
 	if table_size(registered_tracers) > 0 then

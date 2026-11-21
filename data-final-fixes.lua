@@ -437,7 +437,7 @@ local function modify_ammo_per_ammo_type(ammo_type, ammo_name)
 
 	if mode_of_operation == "unified" then
 		local tracer = utils.generate_tracer_name(ammo_name, ammo_type.source_type or "default")
-
+		-- NORE: doesn't support quality damage from ammo
 		projectile_actions = {
 			{
 				type = "direct",
