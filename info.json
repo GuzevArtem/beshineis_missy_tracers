@@ -4,7 +4,7 @@
 	"title": "Beshinei's Respectful Missfired Bullet Tracers",
 	"author": "Beshinei & Kittah Khan & Ownlyme & Piupas",
 	"contact":"",
-	"homepage":"",
+	"homepage":"https://mods.factorio.com/mod/beshineis_missy_tracers",
 	"description": "A mix of bullet tracers and distant misfires, this is how i imagined bullet trails, that respects actual turret/weapon ranges and qualities.\nBased on Bullet Tracers (Ownly's) - 2.1 Fork",
 	"dependencies": [
 		"base >= 2.1",
