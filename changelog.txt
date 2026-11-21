@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2026-11-21
+  Changes:
+    - Add option to increase resistance for foliage (trees, rocks) and stomper-shells.
+    - fix typos and enhance some settings with icons
+    - Add piercing_damage to ammo archetypes
+    - Add some basic handling of quality (guns aren't fixed yet, damage always of normal quality, for now)
+    - Using CustomEffectID
+
+---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 2026-11-20
   Changes:

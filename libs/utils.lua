@@ -8,14 +8,51 @@ do
 ---@class projectile_archetype
 ---@field matching_strings string[]
 ---@field reference_damage double
+---@field piercing_damage double?
 ---@field explosion_filename string?
 ---@field animation_filename string
----@field tinted_animation_filename string
+---@field tinted_animation_filename string?
 ---@field light LightDefinition
 local projectile_archetype={
 }
 end
 
+-- empty if quality is absent
+local deviation_scale_per_quality = {}
+
+---@param entity LuaEntity
+function beshineis_tracers_utils_obj.deviation_coef_for(entity)
+	return deviation_scale_per_quality[entity.quality.name] or 1
+end
+
+do -- prepare quality table
+	local deviation_coef_reduction_per_quality_level = 0
+
+	---@param quality_name string
+	---@param quality QualityPrototype
+	local function prepare_quality(quality_name, quality)
+		deviation_scale_per_quality[quality_name] = 1 - math.max(0, math.min(1, quality.level * deviation_coef_reduction_per_quality_level))
+	end
+
+	if helpers.stage ~= "settings" then
+		deviation_coef_reduction_per_quality_level = tonumber(settings.startup["beshineis_tracers--deviation_coef_reduction_per_quality_level"].value) or 0
+		if deviation_coef_reduction_per_quality_level > 0 then
+			if helpers.stage == "prototype" then
+				if feature_flags["quality"] then
+					for name, quality in pairs(data.raw["quality"]) do
+						prepare_quality(name, quality)
+					end
+				end
+			elseif helpers.stage == "runtime" then
+				if script.feature_flags["quality"] then
+					for name, quality in pairs(prototypes.quality) do
+						prepare_quality(name, quality)
+					end
+				end
+			end
+		end
+	end
+end
 
 
 ---@param ammo_prototype_name string
@@ -37,6 +74,8 @@ function beshineis_tracers_utils_obj.match_best_tracer(tracers, ammo_prototype_n
 	end
 	return tracer_name
 end
+
+
 
 beshineis_tracers_utils = beshineis_tracers_utils_obj
 return beshineis_tracers_utils_obj

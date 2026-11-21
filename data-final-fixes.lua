@@ -206,6 +206,53 @@ local ammo_source_type_map = {
 	["gun"] = "player" -- added here, since working with prototypes, not runtime entities
 }
 
+-- bump resistances for foliage (trees/rocks) and stomper shells
+do
+	local function add_resistance(entity, flat, percent)
+		entity.resistances = entity.resistances or {}
+		for _, resistance in ipairs(entity.resistances) do
+			if resistance.type == "physical" then
+
+				if flat >= 0 then
+					resistance.decrease = (resistance.decrease and math.max(resistance.decrease, flat)) or flat
+				end
+				if percent > 0 then
+					resistance.percent = (resistance.percent and math.max(resistance.percent, percent)) or percent
+				end
+				return
+			end
+		end
+		table.insert(entity.resistances, {type = "physical", decrease = flat, percent = percent})
+	end
+
+	local resistance_tree_flat = settings.startup["beshineis_tracers--resistance_tree_flat"].value or -1
+	local resistance_tree_percent = settings.startup["beshineis_tracers--resistance_tree_percent"].value or -1
+
+	if resistance_tree_flat >= 0 or resistance_tree_percent >= 0 then
+		for _, tree in pairs(data.raw["tree"]) do
+			add_resistance(tree, resistance_tree_flat, resistance_tree_percent)
+		end
+	end
+
+	local resistance_rock_flat = settings.startup["beshineis_tracers--resistance_rock_flat"].value or -1
+	local resistance_rock_percent = settings.startup["beshineis_tracers--resistance_rock_percent"].value or -1
+	local check_rocks = resistance_rock_flat >= 0 or resistance_rock_percent >= 0
+
+	local resistance_stompershell_flat = settings.startup["beshineis_tracers--resistance_stompershell_flat"].value or -1
+	local resistance_stompershell_percent = settings.startup["beshineis_tracers--resistance_stompershell_percent"].value or -1
+	local check_stomper_shells = resistance_stompershell_flat >= 0 or resistance_stompershell_percent >= 0
+
+	if check_rocks or check_stomper_shells then
+		for _, simple in pairs(data.raw["simple-entity"]) do
+			if check_rocks and string.find(simple.name, "rock", 1, true) then
+				add_resistance(simple, resistance_rock_flat, resistance_rock_percent)
+			elseif check_stomper_shells and string.find(simple.name, "stomper-shell", 1, true) then
+				add_resistance(simple, resistance_stompershell_flat, resistance_stompershell_percent)
+			end
+		end
+	end
+end
+
 -- adjust barrel offstes based on configuration
 do
 	---comment
@@ -259,7 +306,7 @@ do
 		projectile_speed = settings.startup["beshineis_tracers--speed"].value or 1.85,
 		projectile_speed_deviaton = settings.startup["beshineis_tracers--speed_deviation"].value or 0.15,
 		range_deviation = settings.startup["beshineis_tracers--range_deviation"].value or 0.15, -- coefficient
-		direction_deviation = settings.startup["beshineis_tracers--angle_deviation"].value or 5, -- in degrees
+		angle_deviation = settings.startup["beshineis_tracers--angle_deviation"].value or 5, -- in degrees
 	}
 
 	for name, configuration in pairs(entity_configurations) do
@@ -374,7 +421,7 @@ end
 
 ---@param ammo_type AmmoType
 ---@param ammo_name string
-local function mmodify_ammo_per_ammo_type (ammo_type, ammo_name)
+local function modify_ammo_per_ammo_type(ammo_type, ammo_name)
 	if not ammo_type then
 		return
 	end
@@ -400,7 +447,7 @@ local function mmodify_ammo_per_ammo_type (ammo_type, ammo_name)
 					projectile = tracer,
 					starting_speed = settings.startup["beshineis_tracers--speed"].value,
 					starting_speed_deviation = settings.startup["beshineis_tracers--speed_deviation"].value,
-					direction_deviation = math.rad(tonumber(settings.startup["beshineis_tracers--angle_deviation"].value) or 0),
+					angle_deviation = math.rad(tonumber(settings.startup["beshineis_tracers--angle_deviation"].value) or 0),
 					range_deviation = settings.startup["beshineis_tracers--range_deviation"].value,
 					max_range = settings.startup["beshineis_tracers--minimal_bullet_range"].value, -- Overrides max range for all bullets
 				},
@@ -416,7 +463,8 @@ local function mmodify_ammo_per_ammo_type (ammo_type, ammo_name)
 					source_effects = {
 						{
 							type = "script",
-							effect_id = "beshineis_tracers--spawn-bullet-projectile"
+							effect_id = "beshineis_tracers--spawn-bullet-projectile",
+							custom_event = "beshineis_tracers_spawn_bullet_projectile_event"
 						}
 					}
 				},
@@ -467,7 +515,7 @@ local function mmodify_ammo_per_ammo_type (ammo_type, ammo_name)
 end
 
 ---@param ammo AmmoItemPrototype
-local function modify_ammo (ammo)
+local function modify_ammo(ammo)
 	if not ammo then
 		return
 	end
@@ -504,7 +552,7 @@ local function modify_ammo (ammo)
 				default_ammo_types[#default_ammo_types + 1] = ammo_type
 				last_default_ammo_type_copy = table.deepcopy(ammo_type)
 			end
-			mmodify_ammo_per_ammo_type(ammo_type, ammo.name)
+			modify_ammo_per_ammo_type(ammo_type, ammo.name)
 
 			::next_ammo_type::
 		end
@@ -538,7 +586,7 @@ local function modify_ammo (ammo)
 			default_ammo_types[#default_ammo_types + 1] = ammo.ammo_type
 		end
 
-		mmodify_ammo_per_ammo_type(ammo.ammo_type, ammo.name)
+		modify_ammo_per_ammo_type(ammo.ammo_type, ammo.name)
 
 		::skip_player_targeting_modifications::
 	end
@@ -634,43 +682,33 @@ local function modify_shotguns_pellets ()
 	end
 end
 
-local leading_configuration = {
-	projectile_speed = tonumber(settings.startup["beshineis_tracers--speed"].value),
-	tick_ahead = tonumber(settings.startup["beshineis_tracers--prediction_overshoot_ticks"].value)
-}
-
 modify_shotguns_pellets()
-if mode_of_operation ~= "projectile_spawner" then
 
-	-- projectile_spawner has custom projectile offset, and should have custom prediction
-	for _,turret in pairs(data.raw["ammo-turret"]) do
-		if turret.attack_parameters and turret.attack_parameters.ammo_category == "bullet" then
-			turret.attack_parameters.apply_projection_to_projectile_creation_position = true
-			turret.attack_parameters.lead_target_for_projectile_speed = leading_configuration.projectile_speed
-			turret.attack_parameters.lead_target_for_projectile_delay = leading_configuration.tick_ahead
+do -- apply leading_configuration
+	local leading_configuration = {
+		projectile_speed = tonumber(settings.startup["beshineis_tracers--speed"].value),
+		ticks_ahead = tonumber(settings.startup["beshineis_tracers--prediction_overshoot_ticks"].value)
+	}
 
---[[
-			-- adjust projectile spawn positions (TODO: works bad, to be replaced with generic configuration instead)
-			-- TODO: seems to not do a thing
-			if turret.attack_parameters.projectile_creation_distance then
-				--turret.attack_parameters.projectile_creation_distance = turret.attack_parameters.projectile_creation_distance + math.max(0,settings.startup["beshineis_tracers--scale"].value*1.3-0.35)
-
-				turret.attack_parameters.projectile_creation_distance = turret.attack_parameters.projectile_creation_distance-1
-				if turret.attack_parameters.shell_particle then
-					turret.attack_parameters.shell_particle.creation_distance=(turret.attack_parameters.shell_particle.creation_distance or -1.88) + 1
-				end
+	if mode_of_operation ~= "projectile_spawner" then
+		-- projectile_spawner has custom projectile offset, and should have custom prediction
+		for _,turret in pairs(data.raw["ammo-turret"]) do
+			if turret.attack_parameters and turret.attack_parameters.ammo_category == "bullet" then
+				turret.attack_parameters.apply_projection_to_projectile_creation_position = true
+				turret.attack_parameters.lead_target_for_projectile_speed = leading_configuration.projectile_speed
+				turret.attack_parameters.lead_target_for_projectile_delay = leading_configuration.ticks_ahead
 			end
-]]--
 		end
 	end
-end
 
-if player_targeting ~= "vanilla" then
-	if player_targeting ~= "entity_leading" then
-		for _, gun in pairs(data.raw["gun"]) do
-			if gun.attack_parameters and gun.attack_parameters.ammo_category == "bullet" then
-				gun.attack_parameters.lead_target_for_projectile_speed = leading_configuration.projectile_speed
-				gun.attack_parameters.lead_target_for_projectile_delay = leading_configuration.tick_ahead
+	-- TODO: logic below affects all guns, including vehicle ones
+	if player_targeting ~= "vanilla" then
+		if player_targeting ~= "entity_leading" then
+			for _, gun in pairs(data.raw["gun"]) do
+				if gun.attack_parameters and gun.attack_parameters.ammo_category == "bullet" then
+					gun.attack_parameters.lead_target_for_projectile_speed = leading_configuration.projectile_speed
+					gun.attack_parameters.lead_target_for_projectile_delay = leading_configuration.ticks_ahead
+				end
 			end
 		end
 	end

@@ -58,7 +58,25 @@ data:extend({
 	},
 
 -- startup
-
+	{
+		hidden = not feature_flags["quality"],
+		type = "double-setting",
+		name = "beshineis_tracers--deviation_coef_reduction_per_quality_level",
+		description = "beshineis_tracers--deviation_coef_reduction_per_quality_level",
+		setting_type = "startup",
+		default_value = 0.1,
+		minimum_value = 0,
+		maximum_value = 1,
+		order = "s0",
+		per_user = false,
+		localised_description = {
+			"mod-setting-description.beshineis_tracers--deviation_coef_reduction_per_quality_level",
+			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
+			{"string-mod-setting.beshineis_tracers--mode_of_operation-unified"},
+			{"mod-setting-name.beshineis_tracers--angle_deviation"},
+			{"string-mod-setting.beshineis_tracers--range_deviation"}
+		}
+	},
 	{
 		type = "string-setting",
 		name = "beshineis_tracers--special_entity_deviation_coef",
@@ -170,6 +188,56 @@ data:extend({
 			-- "hidden_turret"
 		},
 		order = "s11",
+		per_user = false
+	},
+
+-- resistances section
+	{
+		type = "double-setting",
+		name = "beshineis_tracers--resistance_tree_flat",
+		setting_type = "startup",
+		default_value = 2,
+		order = "r1f",
+		per_user = false
+	},
+	{
+		type = "double-setting",
+		name = "beshineis_tracers--resistance_tree_percent",
+		setting_type = "startup",
+		default_value = 65,
+		order = "r1p",
+		per_user = false
+	},
+	{
+		type = "double-setting",
+		name = "beshineis_tracers--resistance_rock_flat",
+		setting_type = "startup",
+		default_value = 4,
+		order = "r2f",
+		per_user = false
+	},
+	{
+		type = "double-setting",
+		name = "beshineis_tracers--resistance_rock_percent",
+		setting_type = "startup",
+		default_value = 75,
+		order = "r2p",
+		per_user = false
+	},
+	{
+		type = "double-setting",
+		name = "beshineis_tracers--resistance_stompershell_flat",
+		setting_type = "startup",
+		default_value = 4,
+		order = "r3f",
+		per_user = false
+	},
+	{
+		type = "double-setting",
+		name = "beshineis_tracers--resistance_stompershell_percent",
+		setting_type = "startup",
+		default_value = 75,
+		order = "r3p",
 		per_user = false
 	},
 

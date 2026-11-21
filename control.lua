@@ -27,6 +27,8 @@ local prediction_overshoot_ticks = settings.startup["beshineis_tracers--predicti
 local registered_tracers = (prototypes.mod_data["beshineis_tracers--mod_data-tracers"] or { data = {}}).data
 local entity_configurations = (prototypes.mod_data["beshineis_tracers--mod_data-entity_configuration_overrides"] or { data = {}}).data
 
+local using_quality = script.feature_flags["quality"] or false
+
 -- separate generator to minimize effect on main random
 script.on_init(function()
 	storage.generator = game.create_random_generator()
@@ -106,7 +108,7 @@ local function get_weapon_range_and_ammo_name(entity)
 
 	if entity.prototype.attack_parameters and entity.prototype.attack_parameters.range then
 		-- turrets should sink here
-		base_range = entity.prototype.attack_parameters.range
+		base_range = entity.prototype.attack_parameters.range * ((using_quality and entity.quality and entity.quality.range_multiplier) or 1)
 
 		-- account for ammo bonuses
 		range_mod, ammo_name = get_ammo_range_bonus_and_ammo_name(entity, nil)
@@ -134,7 +136,7 @@ local function get_weapon_range_and_ammo_name(entity)
 	return base_range, range_mod, ammo_name
 end
 
-script.on_event(defines.events.on_script_trigger_effect, function(event)
+script.on_event("beshineis_tracers_spawn_bullet_projectile_event", function(event)
 	if event.effect_id ~= "beshineis_tracers--spawn-bullet-projectile" then
 		return
 	end
@@ -250,17 +252,23 @@ script.on_event(defines.events.on_script_trigger_effect, function(event)
 	end
 
 	-- Deviation calculation
+	local actual_range_deviation = (cfg.range_deviation * utils.deviation_coef_for(shooter) ) or 0
+	local actual_angle_deviation = (cfg.angle_deviation * utils.deviation_coef_for(shooter) ) or 0
+
 	local range_deviation_coef = 1.0
 	local max_range_deviation_coef = 1.0
-	if cfg.range_deviation and cfg.range_deviation > 0 then
-		max_range_deviation_coef = 1 + cfg.range_deviation/2
 
-		if cfg.direction_deviation and cfg.direction_deviation > 0 then
-			-- find random point inside unit circle, arbitrary picked axis controls range deviation percent, other - angle deviation percent
-			local paired_random_values = math2d.position.rotate_vector({storage.generator() * 0.5, 0}, storage.generator() * 360)
-			range_deviation_coef = 1 + paired_random_values.x * cfg.range_deviation -- how much we over/under shoot target
+	if actual_range_deviation > 0 or actual_angle_deviation > 0 then
+		-- find random point inside unit circle, arbitrary picked axis controls range deviation percent, other - angle deviation percent
+		local paired_random_values = math2d.position.rotate_vector({storage.generator() * 0.5, 0}, storage.generator() * 360)
 
-			local angular_deviation_value = paired_random_values.y * cfg.direction_deviation -- how much we miss target
+		if actual_range_deviation > 0 then
+			max_range_deviation_coef = 1 + actual_range_deviation/2
+			range_deviation_coef = 1 + paired_random_values.x * actual_range_deviation -- how much we over/under shoot target
+		end
+
+		if actual_angle_deviation > 0 then
+			local angular_deviation_value = paired_random_values.y * actual_angle_deviation -- how much we miss target
 
 			-- apply angular deviation
 			local angular_deviation = math2d.position.rotate_vector({nx, ny}, angular_deviation_value)

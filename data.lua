@@ -11,9 +11,8 @@ do -- projectile configurations
 		flags = {"not-on-map"},
 		hit_at_collision_position = true,
 		height = 1,
-		--hit_collision_mask = {layers={water_tile=true}},
 		force_condition = "not-same",--"not-friend",--
-		collision_box = { { -0.45 * projectile_collision_scale, -0.3}, { 0.45 * projectile_collision_scale, 0.3} },
+		collision_box = { { -0.45 * projectile_collision_scale, -0.3}, { 0.45 * projectile_collision_scale + 0.5, 0.3} },
 		hit_collision_mask = {
 			layers = {
 				object = true,
@@ -24,9 +23,8 @@ do -- projectile configurations
 			not_colliding_with_itself = true
 		},
 		direction_only = true,
-		piercing_damage = 1000,
+		piercing_damage = 0,
 		acceleration = tonumber(settings.startup["beshineis_tracers--acceleration"].value) or 0,
-		--projectile_creation_distance = -1.5,
 		animation = {
 			filename = "__beshineis_missy_tracers__/graphics/railgun-beam-yv.png",
 			priority = "extra-high",
@@ -43,12 +41,17 @@ do -- projectile configurations
 		light = {intensity = 0.5, size = 4, color = {r = 1, g = 0.8, b = 0.4} },
 		action = nil -- to be populated on generation phase
 	}
+	-- "flying" is non vanilla, so we need to be sure, before adding potentially non-existing layer
+	if data.raw["collision-layer"] and data.raw["collision-layer"]["flying"] then
+		default_projectile_prototype.hit_collision_mask.layers.flying = true
+	end
 
 	--- @type table<string, projectile_archetype>
 	local archetypes_map = {}
 	archetypes_map["unknown"] = {
 		matching_strings = { },
 		reference_damage = 0,
+		piercing_damage = 0,
 		explosion_filename = "visual-tracer-explosion-hit-normal",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-yv.png",
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-y.png",
@@ -57,6 +60,7 @@ do -- projectile configurations
 	archetypes_map["normal"] = {
 		matching_strings = { "firearm-magazine" },
 		reference_damage = 5,
+		piercing_damage = 0,
 		explosion_filename = "visual-tracer-explosion-hit-normal",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-yv.png",
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-y.png",
@@ -147,7 +151,7 @@ do -- entity configurations
 			creation_distance = nil, --{ x = 0.0, y = 0.0}, -- shift projectile along turret orientation from projectile_center
 			creation_distance_orientation = nil, -- 0.0
 			direction = nil, --0.0, -- direction of shell ejection relative to barrel orientation [0, 1), 0 - forward, 0.25 - right, 0.5 - backwards, 0.75 - left
-			direction_deviation = nil, --0.0
+			angle_deviation = nil, --0.0
 			height = nil, --0.0, -- height of shell above ground when spawned
 			height_deviation = nil, --0.0
 			--name = nil, -- no shell overrides for now
@@ -164,7 +168,7 @@ do -- entity configurations
 		projectile_speed = settings.startup["beshineis_tracers--speed"].value or 1.85, -- in tiles per second
 		projectile_speed_deviaton = settings.startup["beshineis_tracers--speed_deviation"].value or 0.15, -- in tiles per second
 		range_deviation = settings.startup["beshineis_tracers--range_deviation"].value or 0.15, -- coefficient
-		direction_deviation = settings.startup["beshineis_tracers--angle_deviation"].value or 3, -- in degrees
+		angle_deviation = settings.startup["beshineis_tracers--angle_deviation"].value or 3, -- in degrees
 	}
 
 	-- expose full preparsed configuration for mods to edit
@@ -204,3 +208,11 @@ do -- entity deviation coefficient preparsed (not expected, but may be edited by
 		}
 	})
 end
+
+-- append custom-event
+data:extend({
+	{
+		type = "custom-event",
+		name = "beshineis_tracers_spawn_bullet_projectile_event"
+	}
+})

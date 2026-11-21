@@ -9,13 +9,13 @@ local direct_action_additional_delivery = {
 				type = "create-entity",
 				entity_name = "visual-tracer-explosion-hit-normal", -- may be overriden by archetype
 				tile_collision_mask = {layers={water_tile=true}},
-				-- offsets = { { 5, 5 } }, -- offset explosion center closer to actual hit position. ABSOLUTE! NOT RELATIVE TO PROJECTILE
+				offsets = { { 0, 1 } }, -- offset explosion center closer to actual hit position. ABSOLUTE! NOT RELATIVE TO PROJECTILE
 			},
 			{
 				type = "create-entity",
 				entity_name = "water-splash",
 				tile_collision_mask = {layers={ground_tile=true}},
-				-- offsets = { { 5, 5 } }, -- offset splash center closer to actual hit position. ABSOLUTE! NOT RELATIVE TO PROJECTILE
+				offsets = { { 0, 1 } }, -- offset splash center closer to actual hit position. ABSOLUTE! NOT RELATIVE TO PROJECTILE
 			}
 		},
 	}
@@ -174,6 +174,8 @@ local function populate_tracer_prototypes()
 
 			tracer_prototype.action = {}
 
+			local total_damage = 0
+
 			local actions = table.deepcopy(ammo_type.action)
 			if not actions[1] then
 				actions = {actions}
@@ -196,6 +198,18 @@ local function populate_tracer_prototypes()
 					goto next_action
 				end
 
+				-- gather total cumulitive damage from all possible effects
+				for _, effect in pairs((target_effects[1] and target_effects) or {target_effects}) do
+					if effect.type ~= "damage" or not effect.damage then
+						goto next_effect
+					end
+					if effect.damage.type ~= "physical" or not effect.damage.amount then
+						goto next_effect
+					end
+					total_damage = total_damage + effect.damage.amount
+					::next_effect::
+				end
+
 				-- remove all source effects
 				action_deliveries.source_effects = nil
 
@@ -203,6 +217,21 @@ local function populate_tracer_prototypes()
 				tracer_prototype.action[#tracer_prototype.action + 1] = action
 
 				::next_action::
+			end
+
+			-- deduce piercing value
+			if archetype.piercing_damage and archetype.piercing_damage > 0 then
+				tracer_prototype.piercing_damage = archetype.piercing_damage
+			elseif string.find(ammo_prototype_name, "piercing", 1, true) then
+				-- just guessing at this point
+				-- collect all total damage and scale by some amount
+
+				total_damage = total_damage * 25 -- scale it up, red mag~200
+				if total_damage == 0 then
+					total_damage = 100 -- some random, but not ridiculus number
+				end
+
+				tracer_prototype.piercing_damage = total_damage
 			end
 
 			-- modify cosmetic explosion
