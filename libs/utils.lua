@@ -66,9 +66,13 @@ end
 ---@param tracers table<string, table<string, string>>
 ---@param ammo_prototype_name string?
 ---@param source_type AmmoSourceType
----@return string?
+---@return string
 function beshineis_tracers_utils_obj.match_best_tracer(tracers, ammo_prototype_name, source_type)
-	return tracers and ammo_prototype_name and tracers[ammo_prototype_name] and (tracers[ammo_prototype_name][source_type] or tracers[ammo_prototype_name]["default"])
+	local tracer_name = tracers and ammo_prototype_name and tracers[ammo_prototype_name] and (tracers[ammo_prototype_name][source_type] or tracers[ammo_prototype_name]["default"])
+	if not tracer_name then
+		error(string.format("No tracer was defined for ammo=\"%s\" with source_type=\"%s\".", ammo_prototype_name, source_type))
+	end
+	return tracer_name
 end
 
 
