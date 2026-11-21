@@ -9,7 +9,6 @@ data:extend({
 		minimum_value = -0.1,
 		maximum_value = 0.1,
 		order = "h1",
-		per_user = false
 	},
 	{
 		hidden = true,
@@ -21,7 +20,6 @@ data:extend({
 		minimum_value = 0.5,
 		maximum_value = 4.0,
 		order = "h2",
-		per_user = false,
 	},
 	{
 		hidden = true,
@@ -32,7 +30,6 @@ data:extend({
 		minimum_value = 0.0,
 		maximum_value = 1.0,
 		order = "h2",
-		per_user = false
 	},
 	{
 		hidden = true,
@@ -43,7 +40,6 @@ data:extend({
 		minimum_value = 0.1,
 		maximum_value = 3,
 		order = "h3",
-		per_user = false
 	},
 	{
 		hidden = true,
@@ -54,7 +50,6 @@ data:extend({
 		minimum_value = 4,
 		maximum_value = 16,
 		order = "h4",
-		per_user = false
 	},
 
 -- startup
@@ -67,8 +62,7 @@ data:extend({
 		default_value = 0.1,
 		minimum_value = 0,
 		maximum_value = 1,
-		order = "s0",
-		per_user = false,
+		order = "s1",
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--deviation_coef_reduction_per_quality_level",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -84,8 +78,7 @@ data:extend({
 		setting_type = "startup",
 		default_value = "",
 		allow_blank = true,
-		order = "s1",
-		per_user = false,
+		order = "s2",
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--special_entity_deviation_coef",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -100,7 +93,6 @@ data:extend({
 		minimum_value = 0.0,
 		maximum_value = 180.0,
 		order = "s3",
-		per_user = false
 	},
 	{
 		type = "double-setting",
@@ -110,7 +102,6 @@ data:extend({
 		minimum_value = 0.0,
 		maximum_value = 1.0,
 		order = "s4",
-		per_user = false
 	},
 	{
 		type = "int-setting",
@@ -120,7 +111,6 @@ data:extend({
 		minimum_value = 1,
 		maximum_value = 100,
 		order = "s5",
-		per_user = false,
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--minimal_bullet_range",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -136,7 +126,6 @@ data:extend({
 		minimum_value = 0.01,
 		maximum_value = 30,
 		order = "s6",
-		per_user = false
 	},
 	{
 		type = "string-setting",
@@ -150,7 +139,6 @@ data:extend({
 			"vanilla"
 		},
 		order = "s8",
-		per_user = true,
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--player_targeting",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -165,7 +153,6 @@ data:extend({
 		minimum_value = -1000,
 		maximum_value = 1000,
 		order = "s9",
-		per_user = false
 	},
 	{
 		type = "double-setting",
@@ -175,7 +162,6 @@ data:extend({
 		minimum_value = 0.0,
 		maximum_value = 100,
 		order = "s10",
-		per_user = false
 	},
 	{
 		type = "string-setting",
@@ -188,7 +174,6 @@ data:extend({
 			-- "hidden_turret"
 		},
 		order = "s11",
-		per_user = false
 	},
 
 -- resistances section
@@ -198,7 +183,6 @@ data:extend({
 		setting_type = "startup",
 		default_value = 2,
 		order = "r1f",
-		per_user = false
 	},
 	{
 		type = "double-setting",
@@ -206,7 +190,6 @@ data:extend({
 		setting_type = "startup",
 		default_value = 65,
 		order = "r1p",
-		per_user = false
 	},
 	{
 		type = "double-setting",
@@ -214,7 +197,6 @@ data:extend({
 		setting_type = "startup",
 		default_value = 4,
 		order = "r2f",
-		per_user = false
 	},
 	{
 		type = "double-setting",
@@ -222,7 +204,6 @@ data:extend({
 		setting_type = "startup",
 		default_value = 75,
 		order = "r2p",
-		per_user = false
 	},
 	{
 		type = "double-setting",
@@ -230,7 +211,6 @@ data:extend({
 		setting_type = "startup",
 		default_value = 4,
 		order = "r3f",
-		per_user = false
 	},
 	{
 		type = "double-setting",
@@ -238,7 +218,6 @@ data:extend({
 		setting_type = "startup",
 		default_value = 75,
 		order = "r3p",
-		per_user = false
 	},
 
 })
