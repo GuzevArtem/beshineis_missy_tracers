@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.4
+Date: 2026-11-21
+  Changes:
+    - Fix targeting snapping to nearest entity (in all targeting modes except directional, directional snaps in configurable radius around cursor)
+    - Fix pointing close to character causes gun to fire backwards
+    - Fix vehicle turrets not pointing towards cursor with directional targeting
+    - Fix angle deviation not being scaled properly by override
+
+---------------------------------------------------------------------------------------------------
 Version: 1.0.3
 Date: 2026-11-21
   Changes:

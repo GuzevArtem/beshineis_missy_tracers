@@ -75,7 +75,89 @@ function beshineis_tracers_utils_obj.match_best_tracer(tracers, ammo_prototype_n
 	return tracer_name
 end
 
+---@type table<CollisionLayerID, boolean>
+beshineis_tracers_utils_obj.projectile_collision_mask = {
+	object = true,
+	player = true,
+	trigger_target = true,
+	train = true
+}
 
+---@type table<CollisionLayerID, boolean>
+beshineis_tracers_utils_obj.projectile_collision_mask_inverted = {}
+
+do -- generate inverted projectile_collision_mask
+	if helpers.stage == "prototype" then
+		-- "flying" is non vanilla, so we need to be sure, before adding potentially non-existing layer
+		if data.raw["collision-layer"] and data.raw["collision-layer"]["flying"] then
+			beshineis_tracers_utils_obj.projectile_collision_mask["flying"] = true
+		end
+
+		for name, _ in pairs(data.raw["collision-layer"]) do
+			if not beshineis_tracers_utils_obj.projectile_collision_mask[name] then
+				beshineis_tracers_utils_obj.projectile_collision_mask_inverted[name] = true
+			end
+		end
+	elseif helpers.stage == "runtime" then
+		-- "flying" is non vanilla, so we need to be sure, before adding potentially non-existing layer
+		if prototypes.collision_layer and prototypes.collision_layer["flying"] then
+			beshineis_tracers_utils_obj.projectile_collision_mask["flying"] = true
+		end
+
+		for name, _ in pairs(prototypes.collision_layer) do
+			if not beshineis_tracers_utils_obj.projectile_collision_mask[name] then
+				beshineis_tracers_utils_obj.projectile_collision_mask_inverted[name] = true
+			end
+		end
+	end
+end
+
+---@type table<ForceID>
+beshineis_tracers_utils_obj.non_targetable_forces = {
+	"neutral"
+}
+
+---@type table<ForceID>
+beshineis_tracers_utils_obj.targetable_forces = {
+	"enemy"
+}
+
+do -- invert forces
+	-- only runtime knows all forces
+	if helpers.stage == "runtime" then
+		script.on_event(defines.events.on_force_created, function(event)
+			beshineis_tracers_utils_obj.targetable_forces[#beshineis_tracers_utils_obj.targetable_forces + 1] = event.force.name
+		end)
+	end
+end
+
+function beshineis_tracers_utils_obj.on_init()
+	beshineis_tracers_utils_obj.non_targetable_forces = {}
+	for name, _ in pairs(game.forces) do
+		for non_name, _ in ipairs(beshineis_tracers_utils_obj.non_targetable_forces) do
+			if non_name == name then
+				break
+			end
+			beshineis_tracers_utils_obj.targetable_forces[#beshineis_tracers_utils_obj.targetable_forces + 1] = name
+		end
+	end
+end
+
+if helpers.stage == "runtime" then
+	script.on_init(beshineis_tracers_utils_obj.on_init)
+end
+
+---@param force ForceID
+function beshineis_tracers_utils_obj.get_targetable_forces_for(force)
+	local result = { table.unpack(beshineis_tracers_utils_obj.targetable_forces) }
+	for index, name in ipairs(result) do
+		if name == force then
+			table.remove(result, index)
+			break
+		end
+	end
+	return result
+end
 
 beshineis_tracers_utils = beshineis_tracers_utils_obj
 return beshineis_tracers_utils_obj

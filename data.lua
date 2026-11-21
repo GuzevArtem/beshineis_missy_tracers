@@ -1,5 +1,5 @@
 require("prototypes/explosions")
-require("libs/utils")
+local utils = require("libs/utils")
 
 do -- projectile configurations
 	local projectile_collision_scale = tonumber(settings.startup["beshineis_tracers--collision_scale"].value) or 1
@@ -14,12 +14,7 @@ do -- projectile configurations
 		force_condition = "not-same",--"not-friend",--
 		collision_box = { { -0.45 * projectile_collision_scale, -0.3}, { 0.45 * projectile_collision_scale + 0.5, 0.3} },
 		hit_collision_mask = {
-			layers = {
-				object = true,
-				player = true,
-				trigger_target = true,
-				train = true
-			},
+			layers = utils.projectile_collision_mask,
 			not_colliding_with_itself = true
 		},
 		direction_only = true,
@@ -41,10 +36,7 @@ do -- projectile configurations
 		light = {intensity = 0.5, size = 4, color = {r = 1, g = 0.8, b = 0.4} },
 		action = nil -- to be populated on generation phase
 	}
-	-- "flying" is non vanilla, so we need to be sure, before adding potentially non-existing layer
-	if data.raw["collision-layer"] and data.raw["collision-layer"]["flying"] then
-		default_projectile_prototype.hit_collision_mask.layers.flying = true
-	end
+
 
 	--- @type table<string, projectile_archetype>
 	local archetypes_map = {}

@@ -380,7 +380,7 @@ if mode_of_operation ~= "unified" then
 
 		-- scale deviation
 		configuration.range_deviation = configuration.range_deviation * coefficient
-		configuration.angle_deviation_deviation = configuration.range_deviation * coefficient
+		configuration.angle_deviation = configuration.angle_deviation * coefficient
 	end
 
 	for entity_name_pattern, coefficient_value in pairs(entity_deviation_coef_map) do
@@ -616,6 +616,11 @@ local function modify_ammo(ammo)
 			--ammo_type.clamp_position = true
 			ammo_type.force_clamp_to_max_range = true
 		end
+
+		-- same changes for vehicles
+		local vehicle_ammo_type = table.deepcopy(ammo_type)
+		vehicle_ammo_type.source_type = "vehicle"
+		created_ammo_types[#created_ammo_types + 1] = vehicle_ammo_type
 	end
 
 	-- append created_ammo_types to ammo
@@ -663,7 +668,7 @@ local function modify_shotguns_pellets ()
 
 		-- inverted search, searching fs any archetype's strings matches name
 		local archetype
-		for archetype_name, archetype_candidate in pairs(archetypes_map) do
+		for _, archetype_candidate in pairs(archetypes_map) do
 			for _, str in ipairs(archetype_candidate.matching_strings) do
 				if string.find(name, str) then
 					archetype = archetype_candidate

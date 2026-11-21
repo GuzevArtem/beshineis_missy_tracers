@@ -62,7 +62,7 @@ data:extend({
 		default_value = 0.1,
 		minimum_value = 0,
 		maximum_value = 1,
-		order = "s1",
+		order = "s01",
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--deviation_coef_reduction_per_quality_level",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -76,9 +76,9 @@ data:extend({
 		name = "beshineis_tracers--special_entity_deviation_coef",
 		description = "beshineis_tracers--special_entity_deviation_coef",
 		setting_type = "startup",
-		default_value = "",
+		default_value = "*.sniper.*:0.1",
 		allow_blank = true,
-		order = "s2",
+		order = "s02",
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--special_entity_deviation_coef",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -92,7 +92,7 @@ data:extend({
 		default_value = 3.0,
 		minimum_value = 0.0,
 		maximum_value = 180.0,
-		order = "s3",
+		order = "s03",
 	},
 	{
 		type = "double-setting",
@@ -101,7 +101,7 @@ data:extend({
 		default_value = 0.15,
 		minimum_value = 0.0,
 		maximum_value = 1.0,
-		order = "s4",
+		order = "s04",
 	},
 	{
 		type = "int-setting",
@@ -109,8 +109,8 @@ data:extend({
 		setting_type = "startup",
 		default_value = 15,
 		minimum_value = 1,
-		maximum_value = 100,
-		order = "s5",
+		maximum_value = 255,
+		order = "s05",
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--minimal_bullet_range",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -125,7 +125,7 @@ data:extend({
 		default_value = 1,
 		minimum_value = 0.01,
 		maximum_value = 30,
-		order = "s6",
+		order = "s06",
 	},
 	{
 		type = "string-setting",
@@ -138,7 +138,7 @@ data:extend({
 			"entity",
 			"vanilla"
 		},
-		order = "s8",
+		order = "s08",
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--player_targeting",
 			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
@@ -152,7 +152,7 @@ data:extend({
 		default_value = 0,
 		minimum_value = -1000,
 		maximum_value = 1000,
-		order = "s9",
+		order = "s09",
 	},
 	{
 		type = "double-setting",
@@ -175,6 +175,22 @@ data:extend({
 		},
 		order = "s11",
 	},
+	{
+		type = "double-setting",
+		name = "beshineis_tracers--directional_snapping_radius",
+		setting_type = "startup",
+		default_value = 5,
+		minimum_value = 0,
+		maximum_value = 100,
+		order = "s12",
+		localised_description = {
+			"mod-setting-description.beshineis_tracers--directional_snapping_radius",
+			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
+			{"string-mod-setting.beshineis_tracers--mode_of_operation-unified"},
+			{"mod-setting-name.beshineis_tracers--player_targeting"},
+			{"string-mod-setting.beshineis_tracers--player_targeting-directional"}
+		},
+	},
 
 -- resistances section
 	{
@@ -189,6 +205,7 @@ data:extend({
 		name = "beshineis_tracers--resistance_tree_percent",
 		setting_type = "startup",
 		default_value = 65,
+		maximum_value = 100,
 		order = "r1p",
 	},
 	{
@@ -203,6 +220,7 @@ data:extend({
 		name = "beshineis_tracers--resistance_rock_percent",
 		setting_type = "startup",
 		default_value = 75,
+		maximum_value = 100,
 		order = "r2p",
 	},
 	{
@@ -217,6 +235,7 @@ data:extend({
 		name = "beshineis_tracers--resistance_stompershell_percent",
 		setting_type = "startup",
 		default_value = 75,
+		maximum_value = 100,
 		order = "r3p",
 	},
 
