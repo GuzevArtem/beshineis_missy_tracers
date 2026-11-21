@@ -3,16 +3,15 @@ A mod that combines misfires with tracers without compromising the individual ch
 Attempted to be as mod-compatible as possible, partially by reusing as many properties as possible from the entity itself, and partially by exposing configurations in the mod-data.
 
 Based on https://mods.factorio.com/mod/ownlys_tracers_21_fork, but was heavily rewritten on the logic side.
-The original behaviour can be enabled by choosing "Unified" mode of operation in the mode settings. However, some entities' properties will be lost in that mode.
+The original behaviour can be enabled by choosing "Unified" mode of operation in the mode settings. However, some entities' properties will be lost in that mode, as well as quality effects.
 
 # Warning
 Mod is in an early development stage, and 'API' is expected to change.
 
 # TODO
 * Replace thumbnail with a unique one
-* Adjust for quality (at least in lua mode)
 * Redraw/extend library of tracers. (Currently missing blue-plutonium and purple-tungsten variations from common mods)
-* Handle character/characters guns explicitly - give them suitable defaults, so player won't shoot from its stomach.
+* Handle character/characters' guns explicitly - give them suitable defaults, so the player won't shoot from their stomach.
 
 # Wishlist
 * Find a way to make player_targeting "runtime-per-player" setting, keeping turrets(vehicles?) as startup.
@@ -22,5 +21,5 @@ Mod is in an early development stage, and 'API' is expected to change.
 
 # Known issues
 * Misaligned projectiles - figuring out how to properly set up projectile creation properties.
-* Misaligned 'miss' effects - if nothing was hit, bullet will 'explode' 1-2 tiles farther, then at the actual hit position, giving the wrong expectation of range.
+* Misaligned 'miss' effects - if nothing was hit, the bullet will 'explode' 1-2 tiles farther, then at the actual hit position, giving the wrong expectation of range.
 * Missing documentation on overridable mod-data (only some comments in code)
