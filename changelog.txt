@@ -2,7 +2,9 @@
 Version: 1.0.6
 Date: 2026-11-22
   Changes:
-
+    - Update readme
+    - Remove forced gun-turret configuration lost in code
+    - Fixed some cofigurations were applied before actualy generated
 
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.5
