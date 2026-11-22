@@ -11,11 +11,11 @@ Mod is in an early development stage, and 'API' is expected to change.
 
 # Modes of operations
 ## Unified
-Simplest and performance cheapest. Replaces target_effects for each ammo type with "projectile" that have custom prototype (overridable per ammo type) and misfire settings.
-Range is fixed, damage is fixed (no turret or ammo quality bonuses applies).
+Simplest and performance-wise cheapest. Replaces target_effects for each ammo type with "projectile" that has a custom prototype (overridable per ammo type) and misfire settings.
+Range is fixed, damage is fixed (no turret or ammo quality bonuses apply).
 
 ## Lua
-Generates unique projectile for each existing ammo type. Target effects from ammo type is MOVED to target_effects of projectile. Replace cosmetic explosion effect with custom one.
+Generates a unique projectile for each existing ammo type. Target effects from the ammo type is MOVED to the target_effects of the projectile. Replaces the cosmetic explosion effect with a custom one.
 ```lua
 {
     type = "create-entity",
@@ -23,7 +23,7 @@ Generates unique projectile for each existing ammo type. Target effects from amm
 }
 ```
 Sets ammo type target_effect as "script" with custom event id `"beshineis_tracers_spawn_bullet_projectile_event"`.
-On shot script calculates deviation values, selects target entity (if required), extracts full range (`gun/turret range * quality range modifier * ammo range modifier`), extracts ammo damage bonus (only quality default multiplier for now), deduces target position, picks projectile prototype for that ammo, and spawns new projectile.
+On shot, the script calculates deviation values, selects target entity (if required), extracts full range (`gun/turret range * quality range modifier * ammo range modifier`), extracts ammo damage bonus (only quality default multiplier for now), deduces target position, picks projectile prototype for that ammo, and spawns a new projectile.
 
 ## [Redacted]
 \[Redacted]
@@ -33,24 +33,24 @@ TBD
 Should be compatible with most existing mods, except mods that do the same thing. Should not crash, but may not work as expected.
 
 ###Potential conflicts:
-#### In all modes of operations:
-- Mods that changes ammo_type.target_type, since it's necessary setting for proper animations and targetting
-- Mods that REPLACES target_deliveries.target_effects, it may overwrite changes made by this one
+#### In all modes of operation:
+- Mods that change ammo_type.target_type, since it's a necessary setting for proper animations and targeting
+- Mods that REPLACE target_deliveries.target_effects, it may overwrite changes made by this one
 
 #### In Mode of Operations=Unified
-- Mods that changes ranges of turrets/guns beyond Minimal bullet fly range value. Turret will shoot, but bullets will never reach its target.
-- Mods that adds range modifiers for ammo. Will be ignored.
+- Mods that change ranges of turrets/guns beyond the Minimal bullet fly range value. Turret will shoot, but bullets will never reach its target.
+- Mods that add range modifiers for ammo. Will be ignored.
 
 #### In Mode of Operations=Lua
-- Mods that applies base_damage_modifiers or bonus_damage_modifiers modifiers. Since both require projectile, there is no clear way to merge projectile setting automatically. Current behavior - both projectiles will spawn.
-- Mods that alters turret ranges in unexpected ways. If mod replaces turret with another entity - it is expected to work fine, since script don't care, as long as reference to source_entity stays valid.
+- Mods that applies base_damage_modifiers or bonus_damage_modifiers modifiers. Since both require a projectile, there is no clear way to merge projectile settings automatically. Current behaviour - both projectiles will spawn.
+- Mods that alter turret ranges in unexpected ways. If a mod replaces a turret with another entity, it is expected to work fine, since scripts don't care, as long as reference to source_entity stays valid.
 
 #### In Mode of Operations=\[Redacted]
 ...
 
 # Overrides
-During data stage `data.lua` mod exposes structs that can be overriden or extended by other mods.
-This done to allow opt-out or customize entity settings by other mods.
+During the data stage `data.lua` mod exposes structs that can be overridden or extended by other mods.
+This is done to allow opt-out or customise entity settings by other mods.
 
 
 ### projectile_archetype
@@ -107,7 +107,7 @@ local default_projectile_prototype = {
         draw_as_glow = true,
         blend_mode = "additive",
         shift = {0, utils.projectile_animation_shift_y}, -- offset to compensate for trail not yet present on the first frame. In tiles.
-        rotate_shift = true, -- since we compensating for animation offset, we should align it with fire direction
+        rotate_shift = true, -- since we are compensating for animation offset, we should align it with fire direction
         scale = 1,
     },
     light = {intensity = 0.5, size = 4, color = {r = 1, g = 0.8, b = 0.4} }, -- to be replaced from archetype
@@ -147,12 +147,12 @@ entity_deviation_coef_map[".*sniper.*"] = 0.01
 
 Final configuration that will be applied for each entity.
 Exact entity prototype name - configuration.
-Default values (if available) are settup through mod settings.
-During `data-final-fixes.lua` deviations (range and angle) are scaled by entity_deviation_coef_map (for found matched entities), that will create new configurations or alter existing for matched entities.
-In `control.lua` that data is applied during projectile spawn.
+Default values (if available) are set up through mod settings.
+During `data-final-fixes.lua`, deviations (range and angle) are scaled by entity_deviation_coef_map (for found matched entities), that will create new configurations or alter existing ones for matched entities.
+In `control.lua`, that data is applied during projectile spawn.
 
 ```
-I'm not happy with data structure, so it is a subject to change
+I'm not happy with the data structure, so it is subject to change and won't be disclosed here
 ```
 
 ```lua
@@ -179,6 +179,6 @@ I'm not happy with data structure, so it is a subject to change
 * Add third mode of operation - codename [Redacted]. It will create more prototypes, but should be practically without events at runtime. (Only callbacks for events that require entity swapping)
 
 # Known issues
-* Misaligned projectiles - figuring out how to properly set up projectile creation properties. Default source posiotion seems to be not exactly correct.
-* Misaligned 'miss' effects - if nothing was hit, bullet will 'explode' 1-2 tiles farther, then at the actual hit position, giving the wrong expectation of range.
+* Misaligned projectiles - figuring out how to properly set up projectile creation properties. Default source position seems to be not exactly correct.
+* Misaligned 'miss' effects - if nothing was hit, the bullet will 'explode' 1-2 tiles farther, then at the actual hit position, giving the wrong expectation of range.
 * Missing documentation on overridable mod-data (only some comments in code)

@@ -30,7 +30,7 @@ do -- projectile configurations
 			draw_as_glow = true,
 			blend_mode = "additive",
 			shift = {0, utils.projectile_animation_shift_y}, -- offset to compensate for trail not yet present on the first frame. In tiles.
-			rotate_shift = true, -- since we compensating for animation offset, we should align it with fire direction
+			rotate_shift = true, -- since we are compensating for animation offset, we should align it with fire direction
 			scale = 1,
 		},
 		light = {intensity = 0.5, size = 4, color = {r = 1, g = 0.8, b = 0.4} },
