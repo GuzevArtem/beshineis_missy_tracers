@@ -24,7 +24,7 @@ function VisualTracerAnim.generate (scaleA, tintA, scaleB, tintB, count)
 	count = math.max(count - 1, 1)
 	for i = 0, count do
 		local t = i / count
-		local scale = VisualTracerAnim.lerp(scaleA, scaleB, t)*settings.startup["beshineis_tracers--scale"].value
+		local scale = VisualTracerAnim.lerp(scaleA, scaleB, t)
 		local tint = {
 			r = VisualTracerAnim.lerp(tintA.r, tintB.r, t),
 			g = VisualTracerAnim.lerp(tintA.g, tintB.g, t),

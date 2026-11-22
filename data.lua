@@ -44,7 +44,7 @@ do -- projectile configurations
 		matching_strings = { },
 		reference_damage = 0,
 		piercing_damage = 0,
-		explosion_filename = "visual-tracer-explosion-hit-normal",
+		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-yv.png",
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-y.png",
 		light = {intensity = 0.5, size = 4, color = {r = 1, g = 0.8, b = 0.4} }
@@ -53,7 +53,7 @@ do -- projectile configurations
 		matching_strings = { "firearm-magazine" },
 		reference_damage = 5,
 		piercing_damage = 0,
-		explosion_filename = "visual-tracer-explosion-hit-normal",
+		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-yv.png",
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-y.png",
 		light = {intensity = 0.5, size = 4, color = {r = 1, g = 0.8, b = 0.4} }
@@ -61,7 +61,7 @@ do -- projectile configurations
 	archetypes_map["piercing"] = {
 		matching_strings = {"piercing-rounds-magazine", "piercing"},
 		reference_damage = 8,
-		explosion_filename = "visual-tracer-explosion-hit-piercing",
+		explosion_prototype_name = "visual-tracer-explosion-hit-piercing",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-rv.png",
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-r.png",
 		light = {intensity = 0.6, size = 4, color = {r = 1, g = 0.6, b = 0.3} }
@@ -69,7 +69,7 @@ do -- projectile configurations
 	archetypes_map["uranium"] = {
 		matching_strings = {"uranium-rounds-magazine", "uranium"},
 		reference_damage = 24,
-		explosion_filename = "visual-tracer-explosion-hit-uranium",
+		explosion_prototype_name = "visual-tracer-explosion-hit-uranium",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-gv.png",
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-g.png",
 		light = {intensity = 0.6, size = 4, color ={r = 0.7, g = 1, b = 0.5} }
@@ -77,7 +77,7 @@ do -- projectile configurations
 	archetypes_map["plutonium"] = {
 		matching_strings = {"plutonium-rounds-magazine", "plutonium"},
 		reference_damage = 48, -- from ceres
-		explosion_filename = "visual-tracer-explosion-hit-normal",
+		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-gv.png", -- TODO: need blue variation
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-g.png",
 		light = {intensity = 0.6, size = 4, color = {r = 0.3, g = 0.3, b = 1.0} }
@@ -85,7 +85,7 @@ do -- projectile configurations
 	archetypes_map["promethium"] = {
 		matching_strings = {"promethium-rounds-magazine", "promethium"},
 		reference_damage = 48, -- from Nexus
-		explosion_filename = "visual-tracer-explosion-hit-normal",
+		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-rv.png",
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-r.png",
 		light = {intensity = 0.6, size = 4, color = {r = 1.0, g = 0.15, b = 0.5} }
@@ -93,7 +93,7 @@ do -- projectile configurations
 	archetypes_map["tungsten"] = {
 		matching_strings = {"tungsten-rounds-magazine", "tungsten"},
 		reference_damage = 16, -- from tungsten-ammo mod
-		explosion_filename = "visual-tracer-explosion-hit-normal",
+		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
 		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-gv.png", -- TODO: need purple variation
 		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-g.png",
 		light = {intensity = 0.6, size = 4, color = {r = 0.4, g = 0.1, b = 0.45} }
@@ -118,7 +118,7 @@ do -- projectile configurations
 	data:extend({
 		{
 			type = "mod-data",
-			name = "beshineis_tracers--mod_data-tracer_settings",
+			name = "beshineis_tracers--mod_data-projectile_archetypes_overrides",
 			data_type = "beshineis_tracers.tracer-settings",
 			data = archetypes_map
 		}

@@ -5,14 +5,41 @@ local beshineis_tracers_utils_obj = {}
 
 
 do
+---Set of settings applied to any projectile created for ammo_prototype_name with name matching matching_strings
 ---@class projectile_archetype
+---
+---List of patterns to be found in ammo_prototype_name
 ---@field matching_strings table<string>
+---
+---Damage that will be set as base projectile damage, if ammo_prototype has none
 ---@field reference_damage double
+---
+---Piercing damage. If not provided it will be calculated as a scaled actual damage for ammo_prototype containing 'piercing' in its name
 ---@field piercing_damage double?
----@field explosion_filename string?
+---
+---Name of prototype that will be used as 'cosmetic' effect on hit.
+---@field explosion_prototype_name string?
+---
+---Path to animation file. Some values are hardcoded for now:
+---width = 16,
+-- height = 496,
+-- frame_count = 17,
+-- shift - calculated from height
+---
 ---@field animation_filename string
+---
+---Path to animation file (used for shotgun pellets). Some values are hardcoded for now:
+---width = 16,
+-- height = 496,
+-- frame_count = 17,
+-- shift - calculated from height
+--
 ---@field tinted_animation_filename string?
+---
+---Projectile light settings
+---
 ---@field light LightDefinition
+---
 local projectile_archetype={
 }
 end

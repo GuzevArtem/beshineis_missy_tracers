@@ -495,7 +495,7 @@ function(event)
 		}
 	end
 
-	shooter.surface.create_entity({
+	shooter.surface.create_entity{
 			name = tracer,
 			position = spawn_pos,
 			force = shooter.force,
@@ -506,6 +506,6 @@ function(event)
 			base_damage_modifiers = base_damage_modifiers,
 			-- May conflit with other mods :(
 			bonus_damage_modifiers = {}
-	})
+	}
 end)
 --#endregion

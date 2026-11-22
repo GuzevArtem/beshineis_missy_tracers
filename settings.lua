@@ -33,16 +33,6 @@ data:extend({
 	},
 	{
 		hidden = true,
-		type = "double-setting",
-		name = "beshineis_tracers--scale",
-		setting_type = "startup",
-		default_value = 0.5,
-		minimum_value = 0.1,
-		maximum_value = 3,
-		order = "h3",
-	},
-	{
-		hidden = true,
 		type = "int-setting",
 		name = "beshineis_tracers--brackets_count",
 		setting_type = "startup",
@@ -57,7 +47,6 @@ data:extend({
 		hidden = not feature_flags["quality"],
 		type = "double-setting",
 		name = "beshineis_tracers--deviation_coef_reduction_per_quality_level",
-		description = "beshineis_tracers--deviation_coef_reduction_per_quality_level",
 		setting_type = "startup",
 		default_value = 0.1,
 		minimum_value = 0,
@@ -65,16 +54,15 @@ data:extend({
 		order = "s01",
 		localised_description = {
 			"mod-setting-description.beshineis_tracers--deviation_coef_reduction_per_quality_level",
-			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
-			{"string-mod-setting.beshineis_tracers--mode_of_operation-unified"},
 			{"mod-setting-name.beshineis_tracers--angle_deviation"},
-			{"string-mod-setting.beshineis_tracers--range_deviation"}
+			{"mod-setting-name.beshineis_tracers--range_deviation"},
+			{"mod-setting-name.beshineis_tracers--mode_of_operation"},
+			{"string-mod-setting.beshineis_tracers--mode_of_operation-unified"}
 		}
 	},
 	{
 		type = "string-setting",
 		name = "beshineis_tracers--special_entity_deviation_coef",
-		description = "beshineis_tracers--special_entity_deviation_coef",
 		setting_type = "startup",
 		default_value = "*.sniper.*:0.1",
 		allow_blank = true,
@@ -233,6 +221,7 @@ data:extend({
 		order = "r2p",
 	},
 	{
+		hidden = not mods["space-age"],
 		type = "double-setting",
 		name = "beshineis_tracers--resistance_stompershell_flat",
 		setting_type = "startup",
@@ -240,6 +229,7 @@ data:extend({
 		order = "r3f",
 	},
 	{
+		hidden = not mods["space-age"],
 		type = "double-setting",
 		name = "beshineis_tracers--resistance_stompershell_percent",
 		setting_type = "startup",

@@ -3,7 +3,7 @@ local utils = require("libs/utils")
 --#region startup settings
 
 ---@type table<string, projectile_archetype> | table
-local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_settings"].data
+local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-projectile_archetypes_overrides"].data
 local default_projectile_prototype = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_template"].data
 --#endregion
 
@@ -80,9 +80,9 @@ local function apply_cosmetic_effects(tracer_prototype, archetype)
 
 
 	local action_additional_delivery = direct_action_additional_delivery
-	if archetype.explosion_filename then
+	if archetype.explosion_prototype_name then
 		action_additional_delivery = table.deepcopy(direct_action_additional_delivery)
-		action_additional_delivery[1].target_effects[1].entity_name = archetype.explosion_filename
+		action_additional_delivery[1].target_effects[1].entity_name = archetype.explosion_prototype_name
 	end
 
 	if not tracer_prototype.action or #tracer_prototype.action == 0 then

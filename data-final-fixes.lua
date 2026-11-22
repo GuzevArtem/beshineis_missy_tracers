@@ -259,7 +259,63 @@ do
 end
 --#endregion
 
---#region adjust barrel offstes based on configuration
+--#region adjust deviation overrides for special entities, not applicable for "unified"
+if mode_of_operation ~= "unified" then
+	local entity_deviation_coef_map = data.raw["mod-data"]["beshineis_tracers--mod_data-entity_deviation_override_map"].data
+	local default_entity_configuration = entity_configurations["default"] or error("Missing beshineis_tracers--mod_data-entity_deviation_override_map[\"default\"]. Some rude mod may have removed it.")
+
+	---@param name string
+	---@param coefficient double
+	local apply_configuration = function (name, coefficient)
+		local configuration = entity_configurations[name]
+		if not configuration then
+			configuration = table.deepcopy(default_entity_configuration)
+			entity_configurations[name] = configuration
+		end
+
+		-- scale deviation
+		configuration.range_deviation = configuration.range_deviation * coefficient
+		configuration.angle_deviation = configuration.angle_deviation * coefficient
+	end
+
+	for entity_name_pattern, coefficient_value in pairs(entity_deviation_coef_map) do
+		local coefficient = tonumber(coefficient_value)
+		if not coefficient then
+			error(string.format("Corrupted deviation coefficient \"%s\" assosiated with entity name pattern \"%s\"", tostring(coefficient_value), entity_name_pattern))
+		end
+
+		local any_found = false
+		for entity_type, _ in pairs(ammo_source_type_map) do
+			if data.raw[entity_type][entity_name_pattern] then
+				-- exact match - skip pattern recognition
+				any_found = true
+				apply_configuration(entity_name_pattern, coefficient)
+				break -- entity names are unique, go to next pattern
+			else
+				for name, prototype in pairs(data.raw[entity_type]) do
+					-- filter non projectile weapons
+					if not prototype or not prototype.attack_parameters or prototype.attack_parameters.type ~= "projectile" then
+						goto next_prototype
+					end
+
+					if name:match(entity_name_pattern) then
+						any_found = true
+
+						apply_configuration(name, coefficient)
+					end
+
+					::next_prototype::
+				end
+			end
+			if not any_found then
+				log(string.format("No entity prototypes satisfy pattern \"%s\". Please check setting \"special_entity_deviation_coef\"", entity_name_pattern))
+			end
+		end
+	end
+end
+--#endregion
+
+--#region adjust barrel offstes based on configuration. MUST BE AFTER CONFIGURATION GENERATION
 do
 	---comment
 	---@param name string
@@ -285,35 +341,6 @@ do
 		end
 		return nil
 	end
-
-	-- TEMPORARY FOR TESTING TODO: REMOVE
-	entity_configurations["gun-turret"] = {
-		projectile_override = {
-			projectile_center = nil, --{ x = 0.0, y = 0.0}, -- shift rotation pivot from turret position (for off axis turrets mostly)
-			projectile_creation_distance = nil, --0.0, -- shift projectile along turret orientation from projectile_center
-			projectile_orientation_offset = nil, --0.0,
-			true_collinear_ejection = true, -- auto orient along shooting direction
-			use_shooter_direction = false,
-			apply_projection_to_projectile_creation_position = true,
-			-- overridable properties:
-			-- gun.attack_parameters.projectile_creation_distance = math.max(0.1,settings.startup["beshineis_tracers--scale"].value-0.5)
-			-- turret.attack_parameters.projectile_creation_distance = turret.attack_parameters.projectile_creation_distance + math.max(0,settings.startup["beshineis_tracers--scale"].value*1.3-0.35)
-		},
-
-		shell_particle_override = {
-			center = nil, --{ x = 0.0, y = 0.0}, -- shift rotation pivot from turret position (usually same as projectile_center)
-			creation_distance = nil, --0.0,
-			creation_distance_orientation = nil, --0.0
-			-- overridable properties:
-			-- turret.attack_parameters.shell_particle.creation_distance=(turret.attack_parameters.shell_particle.creation_distance or -1.88) + 1
-		},
-
-		-- only for runtime
-		projectile_speed = settings.startup["beshineis_tracers--speed"].value or 1.85,
-		projectile_speed_deviaton = settings.startup["beshineis_tracers--speed_deviation"].value or 0.15,
-		range_deviation = settings.startup["beshineis_tracers--range_deviation"].value or 0.15, -- coefficient
-		angle_deviation = settings.startup["beshineis_tracers--angle_deviation"].value or 5, -- in degrees
-	}
 
 	for name, configuration in pairs(entity_configurations) do
 		if name == "default" then
@@ -367,62 +394,6 @@ do
 		end
 
 		::next_entity_configuration::
-	end
-end
---#endregion
-
---#region adjust deviation overrides for special entities
-if mode_of_operation ~= "unified" then
-	local entity_deviation_coef_map = data.raw["mod-data"]["beshineis_tracers--mod_data-entity_deviation_override_map"].data
-	local default_entity_configuration = entity_configurations["default"] or error("Missing beshineis_tracers--mod_data-entity_deviation_override_map[\"default\"]. Some rude mod may have removed it.")
-
-	---@param name string
-	---@param coefficient double
-	local apply_configuration = function (name, coefficient)
-		local configuration = entity_configurations[name]
-		if not configuration then
-			configuration = table.deepcopy(default_entity_configuration)
-			entity_configurations[name] = configuration
-		end
-
-		-- scale deviation
-		configuration.range_deviation = configuration.range_deviation * coefficient
-		configuration.angle_deviation = configuration.angle_deviation * coefficient
-	end
-
-	for entity_name_pattern, coefficient_value in pairs(entity_deviation_coef_map) do
-		local coefficient = tonumber(coefficient_value)
-		if not coefficient then
-			error(string.format("Corrupted deviation coefficient \"%s\" assosiated with entity name pattern \"%s\"", tostring(coefficient_value), entity_name_pattern))
-		end
-
-		local any_found = false
-		for entity_type, _ in pairs(ammo_source_type_map) do
-			if data.raw[entity_type][entity_name_pattern] then
-				-- exact match - skip pattern recognition
-				any_found = true
-				apply_configuration(entity_name_pattern, coefficient)
-				break -- entity names are unique, go to next pattern
-			else
-				for name, prototype in pairs(data.raw[entity_type]) do
-					-- filter non projectile weapons
-					if not prototype or not prototype.attack_parameters or prototype.attack_parameters.type ~= "projectile" then
-						goto next_prototype
-					end
-
-					if name:match(entity_name_pattern) then
-						any_found = true
-
-						apply_configuration(name, coefficient)
-					end
-
-					::next_prototype::
-				end
-			end
-			if not any_found then
-				error(string.format("No entity prototypes satisfy pattern \"%s\". Please check setting \"special_entity_deviation_coef\"", entity_name_pattern))
-			end
-		end
 	end
 end
 --#endregion
@@ -652,7 +623,7 @@ end
 
 local function modify_shotguns_pellets ()
 	---@type table<string, projectile_archetype> | table
-	local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-tracer_settings"].data
+	local archetypes_map = data.raw["mod-data"]["beshineis_tracers--mod_data-projectile_archetypes_overrides"].data
 
 	local shotgun_scale = 2/3
 	local shotgun_tint = {r=0.5,g=0.5,b=0.5,a=0.5}
