@@ -42,15 +42,15 @@ Should be compatible with most existing mods, except mods that do the same thing
 - Mods that add range modifiers for ammo. Will be ignored.
 
 #### In Mode of Operations=Lua
-- Mods that applies base_damage_modifiers or bonus_damage_modifiers modifiers. Since both require a projectile, there is no clear way to merge projectile settings automatically. Current behaviour - both projectiles will spawn.
-- Mods that alter turret ranges in unexpected ways. If a mod replaces a turret with another entity, it is expected to work fine, since scripts don't care, as long as reference to source_entity stays valid.
+- Mods that apply base_damage_modifiers or bonus_damage_modifiers. Since both require a target effect with type="script", there is no clear way to merge those specific projectile creation settings automatically. Current behaviour: both projectiles will spawn, potentially hitting the target twice.
+- Mods that alter turret ranges in unexpected ways. If a mod replaces a turret with another entity, it is expected to work fine, since scripts don't care, as long as the reference to source_entity stays valid.
 
 #### In Mode of Operations=\[Redacted]
 ...
 
 # Overrides
 During the data stage `data.lua` mod exposes structs that can be overridden or extended by other mods.
-This is done to allow opt-out or customise entity settings by other mods.
+This lets other mods opt out or customise entity settings. Since some logic is stored in ammo prototypes - it is impossible to opt out entirely, but it is possible to remove deviation.
 
 
 ### projectile_archetype
