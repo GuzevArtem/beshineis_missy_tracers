@@ -166,8 +166,6 @@ I'm not happy with the data structure, so it is subject to change and won't be d
 
 
 # TODO
-* Check damage bonuses from shooting entity (seems to be ignored)
-* Check damage scale with research (Same thing)
 * Replace thumbnail with a unique one
 * Redraw/extend library of tracers. (Currently missing blue-plutonium and purple-tungsten variations from common mods)
 * Handle character/characters' guns explicitly - give them suitable defaults, so the player won't shoot from their stomach.

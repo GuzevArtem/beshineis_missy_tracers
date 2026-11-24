@@ -111,9 +111,9 @@ local ammo_inventory_map = {
 ---@param entity LuaEntity
 ---@param selected_inventory_index integer?
 ---@return double -- range_modifier
----@return string? -- ammo_name
+---@return LuaItemPrototype? -- ammo_prototype
 ---@return LuaQualityPrototype? -- quality
-local function get_ammo_range_bonus_and_ammo_name(entity, selected_inventory_index)
+local function get_ammo_range_bonus_and_ammo_prototype(entity, selected_inventory_index)
 	local inv_define = ammo_inventory_map[entity.type]
 	if not inv_define then
 		return 1.0, nil, nil
@@ -142,14 +142,14 @@ local function get_ammo_range_bonus_and_ammo_name(entity, selected_inventory_ind
 		return 1.0, nil, nil
 	end
 
-	local ammo_name = ammo_stack.name
+	local ammo_prototype = ammo_stack.prototype
 	local ammo_type = ammo_stack.prototype.get_ammo_type(ammo_source_type_map[entity.type] or "default")
 	local quality = ammo_stack.quality
 	if ammo_type and ammo_type.range_modifier then
-		return ammo_type.range_modifier, ammo_name, quality
+		return ammo_type.range_modifier, ammo_prototype, quality
 	end
 
-	return 1.0, ammo_name, quality
+	return 1.0, ammo_prototype, quality
 end
 
 ---@param entity LuaEntity
@@ -178,31 +178,23 @@ local function get_active_weapon_prototype_with_quality(entity)
 end
 
 ---@param entity LuaEntity
----@return double
----@return double
----@return string?
----@return LuaQualityPrototype?
-local function get_weapon_range_and_ammo_name_and_quality(entity)
+---@return double -- base range
+---@return double -- range mod
+---@return LuaItemPrototype? -- ammo_prototype
+---@return LuaQualityPrototype? -- quality
+local function get_weapon_range_and_ammo_prototype_and_quality(entity)
 	local base_range = 0.0
-	local range_mod = 1
-	local ammo_name = nil
-	local quality = nil
-
-	if not entity or not entity.valid then
-		return base_range, range_mod, ammo_name
-	end
-
-	local prototype, quality, _ = get_active_weapon_prototype_with_quality(entity)
+	local prototype, weapon_quality, _ = get_active_weapon_prototype_with_quality(entity)
 	if prototype and prototype.attack_parameters then
-		base_range = prototype.attack_parameters.range * ((utils.using_quality and quality and quality.range_multiplier) or 1)
+		base_range = prototype.attack_parameters.range * ((utils.using_quality and weapon_quality and weapon_quality.range_multiplier) or 1)
 	else
 		base_range = minimal_bullet_range
 	end
 
 	-- account for ammo bonuses
-	range_mod, ammo_name, quality = get_ammo_range_bonus_and_ammo_name(entity, (ammo_source_type_map[entity.type] ~= "turret" and entity.selected_gun_index) or nil)
+	local range_mod, ammo_prototype, ammo_quality = get_ammo_range_bonus_and_ammo_prototype(entity, (ammo_source_type_map[entity.type] ~= "turret" and entity.selected_gun_index) or nil)
 
-	return base_range, range_mod, ammo_name, quality
+	return base_range, range_mod, ammo_prototype, ammo_quality
 end
 
 ---@param event EventData.on_script_trigger_effect
@@ -331,8 +323,9 @@ function(event)
 
 	local max_range
 	local range
-	local base_range, range_modifier, ammo_name, ammo_quality = get_weapon_range_and_ammo_name_and_quality(shooter)
+	local base_range, range_modifier, ammo_prototype, ammo_quality = get_weapon_range_and_ammo_prototype_and_quality(shooter)
 	max_range = base_range * range_modifier
+	local shooter_attack_modifier = 1.0
 
 	local shooter_orientation = shooter.orientation -- not true for vehicle's turrets
 	do
@@ -405,6 +398,7 @@ function(event)
 			end
 		else -- turret
 			target_pos = calculate_target_pos(event, shooter, start_pos, cfg.projectile_speed)
+			shooter_attack_modifier = 1.0 + shooter.force.get_turret_attack_modifier(shooter)
 		end
 
 		if not target_pos then
@@ -487,12 +481,17 @@ function(event)
 	end
 
 	-- not using quality variation of projectile, using instead ammo_quality.default_multiplier as base_damage_modifiers
-	local tracer = cfg.projectile_override.tracer_name or utils.match_best_tracer(registered_tracers, ammo_name, ammo_source_type_map[shooter.type])
-	local base_damage_modifiers = {}
+	local tracer = cfg.projectile_override.tracer_name or utils.match_best_tracer(registered_tracers, (ammo_prototype and ammo_prototype.name) or nil, ammo_source_type_map[shooter.type])
+
+	local base_damage_modifiers = {
+		damage_modifier = shooter_attack_modifier
+	}
+	if ammo_prototype then
+		base_damage_modifiers.damage_modifier = base_damage_modifiers.damage_modifier * (1.0 + shooter.force.get_ammo_damage_modifier(ammo_prototype.ammo_category.name))
+	end
+
 	if ammo_quality then
-		base_damage_modifiers = {
-			damage_modifier = ammo_quality.default_multiplier
-		}
+		base_damage_modifiers.damage_modifier = base_damage_modifiers.damage_modifier * ammo_quality.default_multiplier
 	end
 
 	shooter.surface.create_entity{

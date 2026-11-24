@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.7
+Date: 2026-11-24
+  Changes:
+    - Fix technology bonuses (like physical damage research bonus for ammo and/or turret) don't apply to projectile damage
+
+---------------------------------------------------------------------------------------------------
 Version: 1.0.6
 Date: 2026-11-22
   Changes:
@@ -26,7 +32,7 @@ Version: 1.0.3
 Date: 2026-11-21
   Changes:
     - Guns range scales with quality
-    - Ammo damage scales with quality (but ammo range modifier - don't!)
+    - Ammo damage scales with quality (but ammo range modifier - doesn't!)
     - Fix crash when firing from vehicles (turret rotation still broken)
 
 ---------------------------------------------------------------------------------------------------
