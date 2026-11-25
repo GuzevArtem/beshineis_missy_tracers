@@ -10,6 +10,12 @@ Mod is in an early development stage, and 'API' is expected to change.
 
 
 # Modes of operations
+The mod features a few different modes it can run in.
+Modes ultimately change behaviour, which could lead to gameplay and/or underlying implementation changes, causing some modes to be incompatible with other mods.
+> In the future, I hope to find a silver bullet implementation and drop all other modes, but it is a long way from now.
+
+> Recommended mode of operations - LUA, it provides the least compromises, but may be demanding in the late game (due to sheer number of projectiles created per frame)
+
 ## Unified
 Simplest and performance-wise cheapest. Replaces target_effects for each ammo type with "projectile" that has a custom prototype (overridable per ammo type) and misfire settings.
 Range is fixed, damage is fixed (no turret or ammo quality bonuses apply).
@@ -176,7 +182,11 @@ I'm not happy with the data structure, so it is subject to change and won't be d
 * Create satelite mod(s), that exposes individual configurations. Only these satellite mods will handle modded entities explicitly, but those mods require a settings generator of some kind. (As in Better Planets). Mods needed for: tracer settings per ammo; projectile/shell/deviation settings per gun(including vehicle gun's)/turret/armor(or 'naked' engineer)
 * Add third mode of operation - codename [Redacted]. It will create more prototypes, but should be practically without events at runtime. (Only callbacks for events that require entity swapping)
 
+# TOTHINK:
+* Cache calculations per entity (turrets don't change ammo often, target also tends to be the same for at least a few shots, so we can cache it, and recalculate only necessary logic)
+* Simplify logic for non-observed turrets? (No player can see it, so we can 'pretend' that projectiles were shot, rather than calculating them explicitly) May create 'an observer' effect changing effectiveness of turrets depending of being observed or not.
+
 # Known issues
 * Misaligned projectiles - figuring out how to properly set up projectile creation properties. Default source position seems to be not exactly correct.
 * Misaligned 'miss' effects - if nothing was hit, the bullet will 'explode' 1-2 tiles farther, then at the actual hit position, giving the wrong expectation of range.
-* Missing documentation on overridable mod-data (only some comments in code)
+* Missing some documentation on overridable mod-data (`entity_configuration_overrides`)
