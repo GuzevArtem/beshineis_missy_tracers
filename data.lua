@@ -78,24 +78,24 @@ do -- projectile configurations
 		matching_strings = {"plutonium-rounds-magazine", "plutonium"},
 		reference_damage = 48, -- from ceres
 		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
-		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-gv.png", -- TODO: need blue variation
-		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-g.png",
+		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-bv.png",
+		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-b.png",
 		light = {intensity = 0.6, size = 4, color = {r = 0.3, g = 0.3, b = 1.0} }
 	}
 	archetypes_map["promethium"] = {
 		matching_strings = {"promethium-rounds-magazine", "promethium"},
 		reference_damage = 48, -- from Nexus
 		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
-		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-rv.png",
-		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-r.png",
+		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-ov.png",
+		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-ov.png",
 		light = {intensity = 0.6, size = 4, color = {r = 1.0, g = 0.15, b = 0.5} }
 	}
 	archetypes_map["tungsten"] = {
 		matching_strings = {"tungsten-rounds-magazine", "tungsten"},
 		reference_damage = 16, -- from tungsten-ammo mod
 		explosion_prototype_name = "visual-tracer-explosion-hit-normal",
-		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-gv.png", -- TODO: need purple variation
-		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-g.png",
+		animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-pv.png",
+		tinted_animation_filename = "__beshineis_missy_tracers__/graphics/railgun-beam-p.png",
 		light = {intensity = 0.6, size = 4, color = {r = 0.4, g = 0.1, b = 0.45} }
 	}
 	--[[
